@@ -1,0 +1,10 @@
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./:/app
+    ports:
+      - "80:80"
+    command: npm run dev
