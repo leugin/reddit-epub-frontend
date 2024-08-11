@@ -1,4 +1,7 @@
 <script setup lang="ts">
+
+const route = useRoute();
+const router = useRouter();
 const linkForm = reactive({
   link: undefined,
   search: undefined,
@@ -6,7 +9,9 @@ const linkForm = reactive({
 })
 
 const sendForm = ()=> {
-  console.log(linkForm)
+  router.push({
+    path:'/book'
+  })
 }
 
 
@@ -16,19 +21,23 @@ const searchable = ref(false)
 <template>
 
   <div class=" min-h-screen	flex flex-col ">
-    <div class="my-auto">
+    <u-container>
       <div class=""> <h1 class="text-5xl py-9"> Generate your reddit Epub Here</h1></div>
+
+    </u-container>
+    <div class="my-auto">
+
       <div class="grid md:grid-cols-2">
         <div class="flex">
           <img src="~/assets/images/animations/Animated-GIF-Banana.gif" alt="reddit example" class="m-auto">
         </div>
         <div class="flex">
           <UContainer class="my-auto w-full">
-            <UForm :state="linkForm"  @submit="sendForm" >
+            <UForm :state="linkForm"  @submit="sendForm"  >
 
               <div class="flex flex-col  mt-y">
                 <div class="flex-none mb-9">
-                  <UCheckbox v-model="searchable" name="searchable" label="Use seeker" />
+                  <UCheckbox   v-model="searchable" name="searchable" label="Use seeker" />
                 </div>
                 <div class="flex-1 min-h-80">
                   <u-form-group label="link" name="link" class="mb-9" v-if="!searchable">
@@ -43,7 +52,7 @@ const searchable = ref(false)
                 </div>
                 <div class="flex-none flex">
                   <UButton type="submit" class="mx-auto px-14 "  >
-                    Find
+                    <span class="text-white">Find</span>
                   </UButton>
                 </div>
 

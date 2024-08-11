@@ -6,5 +6,5 @@ services:
     volumes:
       - ./:/app
     ports:
-      - "80:80"
+      - "${APP_PORT:-80}:80"
     command: npm run dev
