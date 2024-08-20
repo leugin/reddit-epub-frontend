@@ -1,6 +1,7 @@
 <script setup lang="ts">
+import {BookStore} from "~/store/BookStore";
+const bookStore = BookStore()
 
-const route = useRoute();
 const router = useRouter();
 const linkForm = reactive({
   link: undefined,
@@ -8,12 +9,18 @@ const linkForm = reactive({
   aliases: undefined,
 })
 
-const sendForm = ()=> {
-  router.push({
-    path:'/book'
-  })
-}
+const sendForm = async  ()=> {
+  if (linkForm.link) {
+    const boot = await bookStore.findByLink(linkForm.link)
+    if (boot){
+      await router.push({
+        path:'/book'
+      })
+    }
 
+  }
+
+}
 
 const searchable = ref(false)
 </script>
