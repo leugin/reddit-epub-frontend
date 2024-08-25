@@ -2,11 +2,16 @@
 import {BookStore} from "~/store/BookStore";
 import {onMounted} from "vue";
 import SimpleModal from "~/components/shared/ConfirmModal.vue";
+import "quill/dist/quill.core.css";
+import "quill/dist/quill.snow.css";
+import RichEditor from "~/components/shared/RichEditor.vue";
+
 
 const bookStore = BookStore()
 const modal = useModal()
-
 const selectedItem = ref<any>(null)
+const editor = ref(null)
+const htmlContent = ref('')
 onMounted(async ()=> {
   await bookStore.findByLink('-')
 })
@@ -21,21 +26,18 @@ const links = computed(()=> {
      };
    })
 })
-const html = computed(()=> {
-  return selectedItem.value ? selectedItem.value.html : 'Select a page'
-})
 
 const selectPage = (page: {id:number, label:string, html:string} )=> {
-
+  htmlContent.value = page.html
+  console.log(editor.value)
+  editor?.value?.setHtml(page.html)
+ // quill?.clipboard.dangerouslyPasteHTML(0, page.html);
   if (selectedItem.value){
     confirmModal(page)
   }else  {
     selectedItem.value = {...page}
   }
 
-}
-const changehtml = (e)=> {
-  console.log(e)
 }
 const confirmModal = (page : any) => {
   modal.open(SimpleModal, {
@@ -50,6 +52,10 @@ const confirmModal = (page : any) => {
     }
 
   })
+}
+
+const save = () => {
+  console.log(htmlContent.value)
 }
 
 </script>
@@ -94,8 +100,14 @@ const confirmModal = (page : any) => {
         </div>
       </div>
       <div class=" flex flex-1 bg-white">
-        <div class="w-full text-sm text-black overflow-y-auto" style="height: calc(100vh - 52px); max-height: calc(100vh - 42px)">
-          <div   v-html="html" contenteditable="true" @change="changehtml">  </div>
+        <div class="w-full text-sm text-black " style="height: calc(100vh - 52px); max-height: calc(100vh - 42px)">
+        <RichEditor ref="editor" v-model="htmlContent"></RichEditor>
+          <UButton
+              :ui="{ rounded: 'rounded-full' }"
+              class="absolute bottom-10 right-10"
+              @click="save"
+          >Save</UButton>
+
         </div>
       </div>
     </div>
