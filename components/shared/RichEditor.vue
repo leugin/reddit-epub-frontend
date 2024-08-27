@@ -7,12 +7,25 @@ let quill:Quill|null;
 
 
 const model = defineModel()
- const setHtml = (html:any)=> {
+const isPristine = ref<boolean>(true)
+const setHtml = (html:any)=> {
   quill?.clipboard.dangerouslyPasteHTML(html)
 }
 
+const setPristine= (value: boolean) => {
+  isPristine.value  = value
+}
+
+const getHtml =  ()=> {
+  return quill?.getSemanticHTML()
+}
+
+
 defineExpose({
-  setHtml
+  setHtml,
+  getHtml,
+  setPristine,
+  isPristine
 })
 
 
@@ -24,7 +37,7 @@ onMounted(async ()=> {
   });
   quill.on('text-change', (delta, oldDelta, source) => {
     if (source === 'user'){
-      model.value = quill?.getSemanticHTML()
+      isPristine.value = false
      }
 
   })

@@ -7,8 +7,13 @@ export default class LocalApiService implements ApiService{
 
     async findByLink(link: string) {
          const book = await redditBook
+        const reddit: RedditBook = {
+            name: book.name,
+            pages: book.pages,
+            author: book.author
+        }
         return Promise.resolve({
-            data: book
+            data:reddit
         })
     }
     async findBySeeker(params : {alias:string, criteria:string}) {

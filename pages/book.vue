@@ -5,12 +5,13 @@ import SimpleModal from "~/components/shared/ConfirmModal.vue";
 import "quill/dist/quill.core.css";
 import "quill/dist/quill.snow.css";
 import RichEditor from "~/components/shared/RichEditor.vue";
+import type {RedditPage} from "~/types/RedditBook";
 
 
 const bookStore = BookStore()
 const modal = useModal()
 const selectedItem = ref<any>(null)
-const editor = ref(null)
+const editor = ref<typeof RichEditor| null>(null)
 const htmlContent = ref('')
 onMounted(async ()=> {
   await bookStore.findByLink('-')
@@ -27,31 +28,48 @@ const links = computed(()=> {
    })
 })
 
-const selectPage = (page: {id:number, label:string, html:string} )=> {
-  htmlContent.value = page.html
-  console.log(editor.value)
-  editor?.value?.setHtml(page.html)
- // quill?.clipboard.dangerouslyPasteHTML(0, page.html);
-  if (selectedItem.value){
-    confirmModal(page)
-  }else  {
+const selectPage = ( page: {id:number, label:string, html:string} )=> {
+
+  if (selectedItem.value && !editor?.value?.isPristine){
+    confirmModal(page).then((isYes) => {
+      if (isYes) {
+        if (bookStore.book){
+          const cp:RedditPage = {
+            ...selectedItem.value,
+            html: editor?.value?.getHtml()
+          }
+          bookStore.updatePage(cp, selectedItem.value.id)
+        }
+      }
+      selectedItem.value = { ...page }
+      editor.value.setPristine(true)
+      editor?.value?.setHtml(page.html)
+      htmlContent.value = page.html
+    })
+  } else  {
+    editor.value.setPristine(true)
+    editor?.value?.setHtml(page.html)
     selectedItem.value = {...page}
   }
 
 }
 const confirmModal = (page : any) => {
-  modal.open(SimpleModal, {
-    text: "Save changes?",
-    onYes:()=> {
-      selectedItem.value = {...page}
-      modal.close()
-    },
-    onNo:()=> {
-      selectedItem.value = {...page}
-      modal.close()
-    }
+  return new Promise((resolve, reject)=> {
+    modal.open(SimpleModal, {
+      text: "Save changes?",
+      onYes:()=> {
+        resolve(true)
+        modal.close()
+      },
+      onNo:()=> {
+        resolve(false)
+        modal.close()
+      },
+      onClose: reject
 
+    })
   })
+
 }
 
 const save = () => {
