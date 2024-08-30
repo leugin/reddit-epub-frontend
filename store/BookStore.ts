@@ -7,9 +7,9 @@ const initialState= {
 export const BookStore = defineStore('bookStore',{
     state: () => ({...initialState }),
     actions:{
-       async findByLink(link:string ) {
+       async findBySeeker(params : {alias:string, criteria:string}) {
             const { $api } = useNuxtApp()
-           const response   = await $api.findByLink(link)
+           const response   = await $api.findBySeeker(params)
            this.book = response.data
             return response
         },

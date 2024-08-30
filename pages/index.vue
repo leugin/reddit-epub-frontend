@@ -1,28 +1,33 @@
 <script setup lang="ts">
 import {BookStore} from "~/store/BookStore";
+import {object, string} from "yup";
 const bookStore = BookStore()
 
 const router = useRouter();
 const linkForm = reactive({
-  link: undefined,
   search: undefined,
   aliases: undefined,
 })
-
+const schema = object({
+  aliases: string().required('Please fill the author aliases'),
+  search:string().required('Please fill the criteria to search')
+})
 const sendForm = async  ()=> {
-  if (linkForm.link) {
-    const boot = await bookStore.findByLink(linkForm.link)
+  if (linkForm.search && linkForm.aliases) {
+    const boot = await bookStore.findBySeeker({
+      alias: linkForm.aliases,
+      criteria:linkForm.search
+    })
     if (boot){
       await router.push({
         path:'/book'
       })
     }
-
   }
+
 
 }
 
-const searchable = ref(false)
 </script>
 
 <template>
@@ -36,24 +41,19 @@ const searchable = ref(false)
 
       <div class="grid md:grid-cols-2">
         <div class="flex">
-          <img src="~/assets/images/animations/Animated-GIF-Banana.gif" alt="reddit example" class="m-auto">
+          <img src="~/assets/images/animations/reading-read.gif" alt="reddit example" class="m-auto">
         </div>
         <div class="flex">
           <UContainer class="my-auto w-full">
-            <UForm :state="linkForm"  @submit="sendForm"  >
+            <UForm :state="linkForm"  @submit="sendForm"  :schema="schema">
 
               <div class="flex flex-col  mt-y">
-                <div class="flex-none mb-9">
-                  <UCheckbox   v-model="searchable" name="searchable" label="Use seeker" />
-                </div>
+
                 <div class="flex-1 min-h-80">
-                  <u-form-group label="link" name="link" class="mb-9" v-if="!searchable">
-                    <UInput v-model="linkForm.link"></UInput>
-                  </u-form-group>
-                  <u-form-group label="Aliases" name="aliases" class="mb-9" v-if="searchable">
+                  <u-form-group label="Aliases" name="aliases" class="mb-9"  >
                     <UInput v-model="linkForm.aliases"></UInput>
                   </u-form-group>
-                  <u-form-group label="Find" name="by" class="mb-9" v-if="searchable">
+                  <u-form-group label="Find" name="search" class="mb-9" >
                     <UInput v-model="linkForm.search"></UInput>
                   </u-form-group>
                 </div>
