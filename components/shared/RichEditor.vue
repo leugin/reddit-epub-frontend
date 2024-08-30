@@ -6,7 +6,6 @@ import {onMounted} from "vue";
 let quill:Quill|null;
 
 
-const model = defineModel()
 const isPristine = ref<boolean>(true)
 const setHtml = (html:any)=> {
   quill?.clipboard.dangerouslyPasteHTML(html)
@@ -33,7 +32,7 @@ defineExpose({
 onMounted(async ()=> {
   quill = new Quill('#editor', {
     placeholder: 'Compose an epic...',
-    theme: 'snow'
+    theme: 'snow',
   });
   quill.on('text-change', (delta, oldDelta, source) => {
     if (source === 'user'){
@@ -42,6 +41,9 @@ onMounted(async ()=> {
 
   })
 });
+const alert = (aler = 'asfaef')=> {
+  console.log(aler)
+}
 onUnmounted(()=> {
 })
 
@@ -50,7 +52,10 @@ onUnmounted(()=> {
 </script>
 
 <template>
-  <div ref="editor" id="editor"></div>
+  <div>
+    <div ref="editor" id="editor" ></div>
+  </div>
+
 </template>
 
 <style scoped>

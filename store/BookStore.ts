@@ -19,6 +19,12 @@ export const BookStore = defineStore('bookStore',{
                 this.book.pages[index].sub_title = page.sub_title
                 this.book.pages[index].created = page.created
             }
+        },
+        deletePage(index:number){
+            if (this.book){
+                this.book.pages.splice(index,1)
+            }
         }
+
     }
 })
