@@ -10,7 +10,7 @@ export const BookStore = defineStore('bookStore',{
        async findBySeeker(params : {alias:string, criteria:string}) {
             const { $api } = useNuxtApp()
            const response   = await $api.findBySeeker(params)
-           this.book = response.data
+           this.book = response.data.book
             return response
         },
         updatePage(page:RedditPage, index:number){

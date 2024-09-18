@@ -16,7 +16,7 @@ const showMenu = ref(false)
 const mode = ref<'default'|'editor'|'cover'>('default')
 const htmlContent = ref('')
 onMounted(async ()=> {
-  await bookStore.findByLink('-')
+  //await bookStore.findByLink('-')
 })
 
 

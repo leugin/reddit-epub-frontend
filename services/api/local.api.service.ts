@@ -8,7 +8,11 @@ export default class LocalApiService implements ApiService{
     async findBySeeker(params : {alias:string, criteria:string}) {
         const book = await redditBook
         return Promise.resolve({
-            data: book
+            data: {
+                url:'http://localhost:8080',
+                uuid:'XXXXXXXXX',
+                book
+            }
         })
     }
 }

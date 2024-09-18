@@ -3,6 +3,8 @@ import {BookStore} from "~/store/BookStore";
 import {object, string} from "yup";
 const bookStore = BookStore()
 
+const loading = ref(false)
+
 const router = useRouter();
 const linkForm = reactive({
   search: undefined,
@@ -14,10 +16,13 @@ const schema = object({
 })
 const sendForm = async  ()=> {
   if (linkForm.search && linkForm.aliases) {
+    loading.value = true
     const boot = await bookStore.findBySeeker({
       alias: linkForm.aliases,
       criteria:linkForm.search
     })
+    loading.value = true
+
     if (boot){
       await router.push({
         path:'/book'
@@ -58,7 +63,7 @@ const sendForm = async  ()=> {
                   </u-form-group>
                 </div>
                 <div class="flex-none flex">
-                  <UButton type="submit" class="mx-auto px-14 "  >
+                  <UButton type="submit" class="mx-auto px-14 " :loading="loading" >
                     <span class="text-white">Find</span>
                   </UButton>
                 </div>

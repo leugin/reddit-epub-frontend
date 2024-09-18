@@ -7,7 +7,8 @@ export default defineNuxtConfig({
   ssr:false,
   runtimeConfig: {
     public: {
-      api_driver: process.env.NUXT_API_SERVICE
+      api_driver: process.env.NUXT_API_SERVICE,
+      api: process.env.NUXT_API
     },
   }
 

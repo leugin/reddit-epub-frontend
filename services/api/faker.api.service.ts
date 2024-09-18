@@ -23,7 +23,11 @@ export default class FakerApiService implements ApiService{
     }
     async findBySeeker(params : {alias:string, criteria:string}) {
         return Promise.resolve({
-            data: book
+            data: {
+                url:'http://localhost:8080',
+                uuid: 'dmoe',
+                book:book
+            }
         })
     }
 }
