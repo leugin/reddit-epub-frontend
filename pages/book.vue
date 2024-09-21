@@ -16,7 +16,7 @@ const showMenu = ref(false)
 const mode = ref<'default'|'editor'|'cover'>('default')
 const htmlContent = ref('')
 onMounted(async ()=> {
-  //await bookStore.findByLink('-')
+  await bookStore.findBySeeker({alias:'', criteria:''})
 })
 
 
@@ -114,9 +114,11 @@ const items = [
 
 <template>
   <div>
-    <div class="flex" id="body">
+    <div class="flex h-full " id="body" style="width: 100vw;height: calc(100vh - 42px)">
+<!--      <div class="panel h-full" style="min-width: 250px; background-color: #00dc82; resize: horizontal;"></div>-->
+<!--      <div class="editor h-full" style="flex: 1;background-color: brown"></div>-->
 
-      <div class=" flex w-48	flex-col" >
+      <div class=" flex w-48	flex-col panel" >
         <div class=" head flex" >
           <u-button :variant="showMenu ? 'solid':'ghost'"
                     class="m-auto w-full text-center"
@@ -126,7 +128,7 @@ const items = [
           </u-button>
 
         </div>
-        <div class="book-navigation overflow-x-hidden overflow-y-auto flex flex-col flex-1" style="max-height: calc(100vh - 42px)">
+        <div class="book-navigation overflow-x-hidden overflow-y-auto flex flex-col flex-1" style="max-height: 100vh">
 
           <u-button :variant="-1 == selectedItem?.id ? 'solid':'ghost'"
                     class="flex-1 m-auto w-full"
@@ -238,4 +240,12 @@ nav.head{
   max-height: calc(100vh - 92px)
 }
 
+.panel{
+  border: 2px solid transparent;
+  padding: 4px;
+  width: 150px;
+  resize: horizontal;
+  overflow: auto;
+  max-width: 50vw;
+}
 </style>
