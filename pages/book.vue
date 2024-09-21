@@ -114,9 +114,7 @@ const items = [
 
 <template>
   <div>
-    <div class="flex h-full " id="body" style="width: 100vw;height: calc(100vh - 42px)">
-<!--      <div class="panel h-full" style="min-width: 250px; background-color: #00dc82; resize: horizontal;"></div>-->
-<!--      <div class="editor h-full" style="flex: 1;background-color: brown"></div>-->
+    <div class="flex h-full " id="body" style="width: 100vw;height: calc(100vh - 10px)">
 
       <div class=" flex w-48	flex-col panel" >
         <div class=" head flex" >
@@ -135,21 +133,24 @@ const items = [
                     :ui="{
                      rounded:'rounded-none'
                    }" @click="mode = 'cover'">Cover </u-button>
-          <UTooltip v-for="item in links" :text="item.label">
-
-
-            <UButton
-                :key="item.id" @click="selectPage(item)"
-                :variant="item.id == selectedItem?.id ? 'solid':'ghost'"
-                class="flex-1 list-button"
-                :ui="{
+          <ul>
+            <li v-for="item in links">
+              <UTooltip  :text="item.label" class="w-full">
+                <UButton
+                    :key="item.id" @click="selectPage(item)"
+                    :variant="item.id == selectedItem?.id ? 'solid':'ghost'"
+                    class="flex-1 list-button w-full"
+                    :ui="{
                      rounded:'rounded-none'
                    }"
 
-            >
-              {{item.label}}
-            </UButton>
-          </UTooltip>
+                >
+                  {{item.label}}
+                </UButton>
+              </UTooltip>
+            </li>
+          </ul>
+
         </div>
 
       </div>
