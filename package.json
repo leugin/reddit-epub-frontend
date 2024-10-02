@@ -21,6 +21,8 @@
     "nuxt": "^3.12.4",
     "pinia": "^2.2.1",
     "quill": "^2.0.2",
+    "sortablejs": "^1.15.3",
+    "sortablejs-vue3": "^1.2.11",
     "vue": "latest",
     "yup": "^1.4.0"
   }
