@@ -27,9 +27,9 @@ onMounted(async ()=> {
   })
 })
 
-
-
-
+const user = computed(()=> {
+  return null
+})
 const formIsPristine = computed(()=> editor?.value?.isPristine)
 const moveItemInArray = async (array: any[], from: number, to: number) => {
   const item = array.splice(from, 1)[0];
@@ -154,22 +154,26 @@ const options = computed<SortableOptions>(() => {
 
 <template>
   <div>
-    <nav class="bg-black text-black head flex px-3 justify-between" :class="{show: true}">
+    <nav class="bg-black text-black head flex px-3 justify-between" >
+         <div class="my-auto ">
+           <h1 class="text-white">RedditPub</h1>
 
-      <div class="my-auto ">
-        <u-button variant="ghost"
-                  class="m-auto w-full text-center"
-                  :ui="{
+        </div>
+        <div class="my-auto flex ">
+          <div class="px-6  border-white	mr-5" :class="{'border-r-2': !!user?.id}">
+            <u-button variant="ghost"
+                      class="m-auto w-full text-center"
+                      :ui="{
                                rounded:'rounded-none'
                              }" @click="download">Download
-        </u-button>
-      </div>
-      <div class="my-auto ">
-        <UDropdown v-model:open="open" :items="items" :popper="{ placement: 'bottom-start' }">
-          <UButton color="white" label="" trailing-icon="i-heroicons-chevron-down-20-solid" />
-        </UDropdown>
-      </div>
-
+            </u-button>
+          </div>
+         <div>
+           <UDropdown v-model:open="open" :items="items" :popper="{ placement: 'bottom-start' }" v-if="!!user?.id">
+            <UButton color="white" label="" trailing-icon="i-heroicons-chevron-down-20-solid" />
+          </UDropdown>
+         </div>
+        </div>
     </nav>
 
     <div class="flex h-full " id="body" style="width: 100vw;height: calc(100vh - 100px)">
