@@ -1,5 +1,5 @@
 import {defineStore} from "pinia";
-import type {RedditBook, RedditPage} from "~/types/RedditBook";
+import type {RedditBook} from "~/types/RedditBook";
 
 const initialState= {
     book: undefined as RedditBook|undefined

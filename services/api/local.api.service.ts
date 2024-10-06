@@ -1,6 +1,5 @@
 import type {RedditBook} from "~/types/RedditBook";
 import type ApiService from "~/types/ApiService";
-import {string} from "yup";
 
 const redditBook = import('~/storage/redditBook.json') as unknown as Promise<RedditBook>
 

@@ -91,8 +91,7 @@ const deletePage = (id: number) => {
 
 }
 
-
-const confirmModal = (page : any) => {
+const confirmModal = () => {
   return new Promise((resolve, reject)=> {
     modal.open(SimpleModal, {
       text: "Save changes?",
