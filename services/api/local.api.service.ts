@@ -5,17 +5,25 @@ const redditBook = import('~/storage/redditBook.json') as unknown as Promise<Red
 
 export default class LocalApiService implements ApiService{
 
-    async findByLink(link: string) {
-         const book = await redditBook
-        return Promise.resolve({
-            data: book
-        })
-    }
     async findBySeeker(params : {alias:string, criteria:string}) {
         const book = await redditBook
         return Promise.resolve({
-            data: book
+            data: {
+                url:'http://localhost:8080',
+                uuid:'XXXXXXXXX',
+                book
+            }
         })
+    }
+
+    async show(uuid: string): Promise<{ data: RedditBook }> {
+        const book = await redditBook
+
+        return Promise.resolve({data: book});
+    }
+
+    async store(uuid: string, book: RedditBook): Promise<{ data: { url: string } }> {
+        return Promise.resolve({data: {url: ""}});
     }
 }
 

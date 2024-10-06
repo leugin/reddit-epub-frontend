@@ -1,7 +1,15 @@
 import type {RedditBook} from "~/types/RedditBook";
 
-export default interface ApiService {
-    findByLink(url:string):Promise< {data:RedditBook}>;
-    findBySeeker (params : {alias:string, criteria:string}):Promise< {data:RedditBook}>;
+type BookResponse = {
+    data: {
+        url:string,
+        uuid:string,
+        book:RedditBook
+    }
+}
 
+export default interface ApiService {
+    findBySeeker (params : {alias:string, criteria:string}):Promise<BookResponse>;
+    show (uuid:string):Promise<{data: RedditBook}>;
+    store (uuid:string, book: RedditBook):Promise<{data:{url:string}}>;
 }
