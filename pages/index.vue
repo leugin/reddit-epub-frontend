@@ -17,15 +17,15 @@ const schema = object({
 const sendForm = async  ()=> {
   if (linkForm.search && linkForm.aliases) {
     loading.value = true
-    const boot = await bookStore.findBySeeker({
+    const book = await bookStore.findBySeeker({
       alias: linkForm.aliases,
       criteria:linkForm.search
     })
-    loading.value = true
+    loading.value = false
 
-    if (boot){
+    if (book){
       await router.push({
-        path:'/book'
+        path: `/book/${book.data.uuid}`
       })
     }
   }
@@ -56,14 +56,14 @@ const sendForm = async  ()=> {
 
                 <div class="flex-1 min-h-80">
                   <u-form-group label="Aliases" name="aliases" class="mb-9"  >
-                    <UInput v-model="linkForm.aliases"></UInput>
+                    <UInput v-model="linkForm.aliases" :loading="loading" :disabled="loading"></UInput>
                   </u-form-group>
                   <u-form-group label="Find" name="search" class="mb-9" >
-                    <UInput v-model="linkForm.search"></UInput>
+                    <UInput v-model="linkForm.search" :loading="loading" :disabled="loading"></UInput>
                   </u-form-group>
                 </div>
                 <div class="flex-none flex">
-                  <UButton type="submit" class="mx-auto px-14 " :loading="loading" >
+                  <UButton type="submit" class="mx-auto px-14 " :loading="loading" :disabled="loading" >
                     <span class="text-white">Find</span>
                   </UButton>
                 </div>
