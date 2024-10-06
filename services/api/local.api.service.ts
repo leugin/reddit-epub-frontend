@@ -1,7 +1,7 @@
 import type {RedditBook} from "~/types/RedditBook";
 import type ApiService from "~/types/ApiService";
 
-const redditBook = import('~/storage/redditBook.json') as unknown as Promise<RedditBook>
+const redditBook = import('~/storage/redditbook.json') as unknown as Promise<RedditBook>
 
 export default class LocalApiService implements ApiService{
 
