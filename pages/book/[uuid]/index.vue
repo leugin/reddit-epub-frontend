@@ -10,6 +10,7 @@ import { Sortable } from "sortablejs-vue3";
 import type { SortableOptions } from "sortablejs";
 
 const bookStore = BookStore()
+const route = useRoute();
 const modal = useModal()
 const selectedItem = ref<any>(null)
 const editor = ref<typeof RichEditor| null>(null)
@@ -17,14 +18,16 @@ const mode = ref<'default'|'editor'|'cover'>('default')
 let pages = ref<any[]>([]);
 const htmlContent = ref('')
 onMounted(async ()=> {
-  const response = await bookStore.findBySeeker({alias:'', criteria:''})
-  pages.value = response.data.book.pages.map((item, index ) => {
-    return   {
-      id:index,
-      label: item.title,
-      html: item.html
-    };
-  })
+  if ( typeof route.params.uuid === 'string') {
+    const response = await bookStore.show(route.params.uuid);
+    pages.value = response.data.pages.map((item, index ) => {
+      return   {
+        id:index,
+       ...item
+      };
+    })
+  }
+
 })
 
 const user = computed(()=> {
@@ -44,7 +47,7 @@ const onEnd = (event: any) => {
   }
 }
 const updatePage = (newPage: any, id:number) => {
-  const  index = pages.value.findIndex(value => value.id === id);
+  const  index = pages.value.findIndex(value => value?.id === id);
   if(index != -1){
     pages.value[index].html = newPage.html
   }
@@ -60,7 +63,7 @@ const deletePage = (id: number) => {
   }
 
 }
- const selectPage = ( page: {id:number, label:string, html:string} )=> {
+ const selectPage = ( page: {id:number, title:string,sub_title:string, html:string} )=> {
   if (selectedItem.value && !formIsPristine){
     confirmModal(page).then((isYes) => {
       if (isYes) {
@@ -108,8 +111,23 @@ const confirmModal = (page : any) => {
 
 }
 
-const download = () => {
-  console.log(pages)
+const download = async () => {
+  if(typeof route.params.uuid ==='string' && bookStore.book ) {
+    bookStore.book.pages = pages.value.map((item) => {
+      return {
+        title: item.title,
+        sub_title: item.sub_title,
+        created: item.created,
+        html: item.html,
+      }
+    })
+    const response = await bookStore.store(route.params.uuid)
+    const link = document.createElement('a')
+    link.setAttribute('href', response.data.url)
+    link.setAttribute('target', '_black')
+    link.setAttribute('download','true')
+    link.click()
+  }
 }
 const save = () => {
   const cp:any = {
@@ -219,7 +237,7 @@ const options = computed<SortableOptions>(() => {
                                      }"
 
                 >
-                  {{element.label}}
+                  {{element.title}}
                 </UButton>
               </div>
             </template>
@@ -234,7 +252,7 @@ const options = computed<SortableOptions>(() => {
             <div class="flex flex-col flex-1">
               <h1 class="m-auto font-bold">{{bookStore.book?.name  ? bookStore.book?.name:  '-'}}&nbsp;</h1>
               <h2 class="m-auto">{{bookStore.book?.author  ? bookStore.book?.author: '-'}}&nbsp;</h2>
-              <h2 class="m-auto">{{selectedItem?.label ? selectedItem?.label : '-'}}</h2>
+              <h2 class="m-auto">{{selectedItem?.title ? selectedItem?.title : '-'}}</h2>
             </div>
             <div class="px-4 w-48">
               <u-button variant="ghost"

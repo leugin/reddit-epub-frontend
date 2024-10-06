@@ -9,22 +9,27 @@ export const BookStore = defineStore('bookStore',{
     actions:{
        async findBySeeker(params : {alias:string, criteria:string}) {
             const { $api } = useNuxtApp()
-           const response   = await $api.findBySeeker(params)
-           this.book = response.data.book
+           return await $api.findBySeeker(params)
+        },
+        async show(uuid: string) {
+            const { $api } = useNuxtApp()
+            const response   = await $api.show(uuid)
+            this.book = response.data
             return response
         },
-        updatePage(page:RedditPage, index:number){
+        updatePage(page:{html:string}, index:number){
             if (this.book){
                 this.book.pages[index].html = page.html
-                this.book.pages[index].sub_title = page.sub_title
-                this.book.pages[index].created = page.created
             }
         },
         deletePage(index:number){
             if (this.book){
                 this.book.pages.splice(index,1)
             }
-        }
-
+        },
+        store(uuid:string){
+            const { $api } = useNuxtApp()
+            return $api.store(uuid, this.book as RedditBook)
+        },
     }
 })
