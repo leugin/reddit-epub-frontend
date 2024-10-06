@@ -123,7 +123,6 @@ const download = async () => {
     const response = await bookStore.store(route.params.uuid)
     const link = document.createElement('a')
     link.setAttribute('href', response.data.url)
-    link.setAttribute('target', '_black')
     link.setAttribute('download','true')
     link.click()
   }
