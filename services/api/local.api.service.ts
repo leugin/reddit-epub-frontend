@@ -23,7 +23,7 @@ export default class LocalApiService implements ApiService{
         return Promise.resolve({data: book});
     }
 
-    store(uuid: string, book: RedditBook): Promise<{ data: { url: string } }> {
+    async store(uuid: string, book: RedditBook): Promise<{ data: { url: string } }> {
         return Promise.resolve({data: {url: ""}});
     }
 }
