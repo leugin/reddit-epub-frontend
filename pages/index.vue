@@ -2,6 +2,7 @@
 import {BookStore} from "~/store/BookStore";
 import {object, string} from "yup";
 const bookStore = BookStore()
+const toast = useToast()
 
 const loading = ref(false)
 
@@ -17,17 +18,31 @@ const schema = object({
 const sendForm = async  ()=> {
   if (linkForm.search && linkForm.aliases) {
     loading.value = true
-    const book = await bookStore.findBySeeker({
-      alias: linkForm.aliases,
-      criteria:linkForm.search
-    })
-    loading.value = false
-
-    if (book){
-      await router.push({
-        path: `/book/${book.data.uuid}`
+    try{
+      const book = await bookStore.findBySeeker({
+        alias: linkForm.aliases,
+        criteria:linkForm.search
       })
+
+      if (book){
+        await router.push({
+          path: `/book/${book.data.uuid}`
+        })
+      }
+    } catch (e:any) {
+      if (e.code === 'ERR_NETWORK'){
+        toast.add({
+          title:"Error",
+          color:'red',
+          description: "Somethings is wrong, please try again",
+        })
+      }
+      console.log(e)
+    } finally {
+      loading.value = false
+
     }
+
   }
 
 

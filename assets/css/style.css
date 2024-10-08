@@ -6,3 +6,9 @@ body{
 .ql-container.ql-snow, .ql-toolbar.ql-snow{
     border: none !important;
 }
+.notifications {
+    top: 0 !important;
+    right: 0 !important;
+    bottom: inherit !important;
+    left: inherit !important;
+}
