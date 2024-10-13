@@ -15,12 +15,12 @@ const modal = useModal()
 const selectedItem = ref<any>(null)
 const editor = ref<typeof RichEditor| null>(null)
 const mode = ref<'default'|'editor'|'cover'>('default')
-let pages = ref<any[]>([]);
+let content = ref<any[]>([]);
 const htmlContent = ref('')
 onMounted(async ()=> {
   if ( typeof route.params.uuid === 'string') {
     const response = await bookStore.show(route.params.uuid);
-    pages.value = response.data.pages.map((item, index ) => {
+    content.value = response.data.content.map((item, index ) => {
       return   {
         id:index,
        ...item
@@ -41,25 +41,25 @@ const moveItemInArray = async (array: any[], from: number, to: number) => {
 };
 
 const onEnd = (event: any) => {
-  if (bookStore.book?.pages){
-    moveItemInArray(pages.value, event.oldIndex, event.newIndex)
+  if (bookStore.book?.content){
+    moveItemInArray(content.value, event.oldIndex, event.newIndex)
 
   }
 }
 const updatePage = (newPage: any, id:number) => {
-  const  index = pages.value.findIndex(value => value?.id === id);
+  const  index = content.value.findIndex(value => value?.id === id);
   if(index != -1){
-    pages.value[index].html = newPage.html
+    content.value[index].html = newPage.html
   }
 }
 
 const deletePage = (id: number) => {
-  const index = pages.value.findIndex(val => val.id === id)
+  const index = content.value.findIndex(val => val.id === id)
   if (index != -1) {
     const nextIndex = index == 0 ? 1:  index - 1
-    const nextPage = pages.value[nextIndex];
+    const nextPage = content.value[nextIndex];
     selectPage(nextPage);
-    pages.value.splice(index, 1)
+    content.value.splice(index, 1)
   }
 
 }
@@ -112,7 +112,7 @@ const confirmModal = () => {
 
 const download = async () => {
   if(typeof route.params.uuid ==='string' && bookStore.book ) {
-    bookStore.book.pages = pages.value.map((item) => {
+    bookStore.book.content = content.value.map((item) => {
       return {
         title: item.title,
         sub_title: item.sub_title,
@@ -199,7 +199,7 @@ const options = computed<SortableOptions>(() => {
 
 
           <Sortable
-              :list="pages"
+              :list="content"
               item-key="id"
               tag="div"
               @end="onEnd"
