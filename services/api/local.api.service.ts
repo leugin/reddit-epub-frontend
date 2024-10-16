@@ -1,6 +1,5 @@
 import type {RedditBook} from "~/types/RedditBook";
 import type ApiService from "~/types/ApiService";
-import {string} from "yup";
 
 
 export default class LocalApiService implements ApiService{
