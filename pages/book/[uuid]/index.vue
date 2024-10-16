@@ -13,14 +13,15 @@ const bookStore = BookStore()
 const route = useRoute();
 const modal = useModal()
 const selectedItem = ref<any>(null)
+const queueLoading = ref(0)
 const editor = ref<typeof RichEditor| null>(null)
 const mode = ref<'default'|'editor'|'cover'>('default')
-let pages = ref<any[]>([]);
+let content = ref<any[]>([]);
 const htmlContent = ref('')
 onMounted(async ()=> {
   if ( typeof route.params.uuid === 'string') {
     const response = await bookStore.show(route.params.uuid);
-    pages.value = response.data.pages.map((item, index ) => {
+    content.value = response.data.content.map((item, index ) => {
       return   {
         id:index,
        ...item
@@ -33,6 +34,8 @@ onMounted(async ()=> {
 const user = computed(()=> {
   return null
 })
+const isLoading = computed(()=> queueLoading.value !== 0);
+
 const formIsPristine = computed(()=> editor?.value?.isPristine)
 const moveItemInArray = async (array: any[], from: number, to: number) => {
   const item = array.splice(from, 1)[0];
@@ -41,30 +44,30 @@ const moveItemInArray = async (array: any[], from: number, to: number) => {
 };
 
 const onEnd = (event: any) => {
-  if (bookStore.book?.pages){
-    moveItemInArray(pages.value, event.oldIndex, event.newIndex)
-
+  if (bookStore.book?.content){
+    moveItemInArray(content.value, event.oldIndex, event.newIndex)
   }
 }
 const updatePage = (newPage: any, id:number) => {
-  const  index = pages.value.findIndex(value => value?.id === id);
+  const  index = content.value.findIndex(value => value?.id === id);
   if(index != -1){
-    pages.value[index].html = newPage.html
+    content.value[index].html = newPage.html
   }
 }
 
 const deletePage = (id: number) => {
-  const index = pages.value.findIndex(val => val.id === id)
+  const index = content.value.findIndex(val => val.id === id)
   if (index != -1) {
     const nextIndex = index == 0 ? 1:  index - 1
-    const nextPage = pages.value[nextIndex];
+    const nextPage = content.value[nextIndex];
     selectPage(nextPage);
-    pages.value.splice(index, 1)
+    content.value.splice(index, 1)
   }
 
 }
  const selectPage = ( page: {id:number, title:string,sub_title:string, html:string} )=> {
-  if (selectedItem.value && !formIsPristine){
+  console.log(selectedItem.value, formIsPristine.value)
+  if (selectedItem.value && !formIsPristine.value){
     confirmModal(page).then((isYes) => {
       if (isYes) {
         if (bookStore.book){
@@ -111,9 +114,10 @@ const confirmModal = (page : any) => {
 
 }
 
-const download = async () => {
-  if(typeof route.params.uuid ==='string' && bookStore.book ) {
-    bookStore.book.pages = pages.value.map((item) => {
+
+const store = async  () => {
+  if (typeof route.params.uuid ==='string' && bookStore.book ) {
+    bookStore.book.content = content.value.map((item) => {
       return {
         title: item.title,
         sub_title: item.sub_title,
@@ -121,7 +125,14 @@ const download = async () => {
         html: item.html,
       }
     })
-    const response = await bookStore.store(route.params.uuid)
+    return  await bookStore.store(route.params.uuid)
+  }
+  return Promise.reject('book it is not valid')
+}
+
+const saveBook = async (download = false) => {
+  const response = await store()
+  if (download){
     const link = document.createElement('a')
     link.setAttribute('href', response.data.url)
     link.setAttribute('target', '_black')
@@ -129,13 +140,15 @@ const download = async () => {
     link.click()
   }
 }
-const save = () => {
+const savePage = () => {
   const cp:any = {
     ...selectedItem.value,
     html: editor?.value?.getHtml()
   }
   updatePage(cp, selectedItem.value.id)
- }
+  editor?.value.setPristine(true)
+
+}
 const del = () => {
  deletePage(selectedItem.value.id)
 
@@ -172,36 +185,45 @@ const options = computed<SortableOptions>(() => {
 
 <template>
   <div>
-    <nav class="bg-black text-black head flex px-3 justify-between" >
-         <div class="my-auto ">
-           <h1 class="text-white">RedditPub</h1>
-
+    <nav class="bg-black text-black head" >
+      <div class="w-full flex py-3.5" >
+        <div class="my-auto ">
+          <h1 class="text-white">RedditPub</h1>
         </div>
         <div class="my-auto flex ">
-          <div class="px-6  border-white	mr-5" :class="{'border-r-2': !!user?.id}">
+          <div class=" border-white flex" :class="{'border-r-2': !!user?.id}">
             <u-button variant="ghost"
-                      class="m-auto w-full text-center"
+                      class="m-auto text-center"
+                      :disabled="isLoading"
+                      :loading="isLoading"
                       :ui="{
                                rounded:'rounded-none'
-                             }" @click="download">Download
+                             }" @click="saveBook">Save
+            </u-button>
+            <u-button variant="ghost"
+                      class="m-auto text-center"
+                      :disabled="isLoading"
+                      :loading="isLoading"
+                      :ui="{
+                               rounded:'rounded-none'
+                             }" @click="saveBook(true)">Download
             </u-button>
           </div>
-         <div>
-           <UDropdown v-model:open="open" :items="items" :popper="{ placement: 'bottom-start' }" v-if="!!user?.id">
-            <UButton color="white" label="" trailing-icon="i-heroicons-chevron-down-20-solid" />
-          </UDropdown>
-         </div>
+          <div>
+            <UDropdown v-model:open="open" :items="items" :popper="{ placement: 'bottom-start' }" v-if="!!user?.id">
+              <UButton color="white" label="" trailing-icon="i-heroicons-chevron-down-20-solid" />
+            </UDropdown>
+          </div>
         </div>
+      </div>
     </nav>
 
-    <div class="flex h-full " id="body" style="width: 100vw;height: calc(100vh - 100px)">
+    <div class="flex h-full " id="body" style="height: calc(100vh - 100px)">
 
       <div class=" flex w-48	flex-col panel" >
-        <div class="book-navigation overflow-x-hidden overflow-y-auto flex flex-col flex-1" style="max-height: 100vh">
-
-
+        <div class="book-navigation flex flex-col flex-1" style="max-height: 100vh">
           <Sortable
-              :list="pages"
+              :list="content"
               item-key="id"
               tag="div"
               @end="onEnd"
@@ -246,9 +268,9 @@ const options = computed<SortableOptions>(() => {
         </div>
 
       </div>
-      <div class=" flex flex-1 bg-white flex-col overflow-y-auto " style="max-height: 100vh">
-        <div class="w-full text-sm text-black main" v-show="mode === 'editor'">
-          <div class="w-full flex   py-4 ">
+      <div class=" flex flex-1 bg-white flex-col overflow-y-auto overflow-x-hidden " style="max-height: 100vh;">
+        <div class=" text-sm text-black main" v-show="mode === 'editor'">
+          <div class=" flex   py-4 ">
             <div class="flex flex-col flex-1">
               <h1 class="m-auto font-bold">{{bookStore.book?.name  ? bookStore.book?.name:  '-'}}&nbsp;</h1>
               <h2 class="m-auto">{{bookStore.book?.author  ? bookStore.book?.author: '-'}}&nbsp;</h2>
@@ -266,7 +288,7 @@ const options = computed<SortableOptions>(() => {
                         :disabled="formIsPristine"
                         :ui="{
                                rounded:'rounded-none'
-                             }" @click="save">Save
+                             }" @click="savePage">Save
               </u-button>
 
             </div>
@@ -276,10 +298,10 @@ const options = computed<SortableOptions>(() => {
             <RichEditor ref="editor" v-model="htmlContent" :title="selectedItem?.title"></RichEditor>
           </div>
         </div>
-        <div class="w-full text-sm text-black main" v-show="mode === 'cover'">
+        <div class=" text-sm text-black main" v-show="mode === 'cover'">
           <h1>Cover</h1>
         </div>
-        <div class="w-full text-sm text-black main flex" v-show="mode === 'default'">
+        <div class=" text-sm text-black main flex" v-show="mode === 'default'">
           <div class="m-auto">
             <h1 class="font-bold"> Welcome here you can personalized your book  </h1>
             <h3> In the right you can choose the character to edit or you can personalized the Cover</h3>
@@ -294,9 +316,6 @@ const options = computed<SortableOptions>(() => {
 </template>
 
 <style scoped>
-.head{
-  height: 52px;
-}
 
 .list-button{
   white-space: nowrap;

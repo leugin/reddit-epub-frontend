@@ -1,7 +1,5 @@
 body{
-    width: 100vw;
     height: 100vh;
-    overflow: hidden;
 }
 .ql-container.ql-snow, .ql-toolbar.ql-snow{
     border: none !important;
