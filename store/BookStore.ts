@@ -19,12 +19,12 @@ export const BookStore = defineStore('bookStore',{
         },
         updatePage(page:{html:string}, index:number){
             if (this.book){
-                this.book.pages[index].html = page.html
+                this.book.content[index].html = page.html
             }
         },
         deletePage(index:number){
             if (this.book){
-                this.book.pages.splice(index,1)
+                this.book.content.splice(index,1)
             }
         },
         store(uuid:string){

@@ -8,6 +8,7 @@ import RichEditor from "~/components/shared/RichEditor.vue";
 import type {RedditPage} from "~/types/RedditBook";
 import { Sortable } from "sortablejs-vue3";
 import type { SortableOptions } from "sortablejs";
+import {object, string} from "yup";
 
 const bookStore = BookStore()
 const route = useRoute();
@@ -18,15 +19,28 @@ const editor = ref<typeof RichEditor| null>(null)
 const mode = ref<'default'|'editor'|'cover'>('default')
 let content = ref<any[]>([]);
 const htmlContent = ref('')
+
+const coverForm = reactive({
+  description: '',
+  cover: '',
+})
+const schema = object({
+  description: string(),
+  cover:string()
+})
+
+
 onMounted(async ()=> {
   if ( typeof route.params.uuid === 'string') {
-    const response = await bookStore.show(route.params.uuid);
+    const response = await bookStore.show(route.params.uuid)
     content.value = response.data.content.map((item, index ) => {
       return   {
         id:index,
        ...item
       };
     })
+    coverForm.cover = response.data.cover ?? ''
+    coverForm.description = response.data.description ?? ''
   }
 
 })
@@ -51,7 +65,7 @@ const onEnd = (event: any) => {
 const updatePage = (newPage: any, id:number) => {
   const  index = content.value.findIndex(value => value?.id === id);
   if(index != -1){
-    content.value[index].html = newPage.html
+    content.value[index].content = newPage.content
   }
 }
 
@@ -65,7 +79,7 @@ const deletePage = (id: number) => {
   }
 
 }
- const selectPage = ( page: {id:number, title:string,sub_title:string, html:string} )=> {
+ const selectPage = ( page: {id:number, title:string,sub_title:string, content:string} )=> {
   console.log(selectedItem.value, formIsPristine.value)
   if (selectedItem.value && !formIsPristine.value){
     confirmModal(page).then((isYes) => {
@@ -73,21 +87,21 @@ const deletePage = (id: number) => {
         if (bookStore.book){
           const cp:RedditPage = {
             ...selectedItem.value,
-            html: editor?.value?.getHtml()
+            content: editor?.value?.getHtml()
           }
           updatePage(cp, selectedItem.value.id )
          }
       }
       selectedItem.value = { ...page }
       editor.value.setPristine(true)
-      editor?.value?.setHtml(page.html)
-      htmlContent.value = page.html
+      editor?.value?.setHtml(page.content)
+      htmlContent.value = page.content
       mode.value = 'editor';
 
     })
   } else  {
     editor.value.setPristine(true)
-    editor?.value?.setHtml(page.html)
+    editor?.value?.setHtml(page.content)
     selectedItem.value = {...page}
     mode.value = 'editor';
   }
@@ -117,15 +131,20 @@ const confirmModal = () => {
 
 const store = async  () => {
   if (typeof route.params.uuid ==='string' && bookStore.book ) {
+    queueLoading.value = queueLoading.value + 1
     bookStore.book.content = content.value.map((item) => {
       return {
         title: item.title,
-        sub_title: item.sub_title,
         created: item.created,
-        html: item.html,
+        content: item.content,
       }
     })
-    return  await bookStore.store(route.params.uuid)
+    bookStore.book.cover = coverForm.cover
+    bookStore.book.description = coverForm.description
+    const response =  await bookStore.store(route.params.uuid)
+    queueLoading.value = queueLoading.value - 1
+    return response
+
   }
   return Promise.reject('book it is not valid')
 }
@@ -143,7 +162,7 @@ const saveBook = async (download = false) => {
 const savePage = () => {
   const cp:any = {
     ...selectedItem.value,
-    html: editor?.value?.getHtml()
+    content: editor?.value?.getHtml()
   }
   updatePage(cp, selectedItem.value.id)
   editor?.value.setPristine(true)
@@ -186,7 +205,7 @@ const options = computed<SortableOptions>(() => {
 <template>
   <div>
     <nav class="bg-black text-black head" >
-      <div class="w-full flex py-3.5" >
+      <div class="w-full flex py-3.5 justify-between" >
         <div class="my-auto ">
           <h1 class="text-white">RedditPub</h1>
         </div>
@@ -298,8 +317,31 @@ const options = computed<SortableOptions>(() => {
             <RichEditor ref="editor" v-model="htmlContent" :title="selectedItem?.title"></RichEditor>
           </div>
         </div>
-        <div class=" text-sm text-black main" v-show="mode === 'cover'">
-          <h1>Cover</h1>
+        <div class=" text-sm bg-black main h-full" v-show="mode === 'cover'">
+          <UContainer class="m-auto ">
+            <UForm :state="coverForm"  @submit="store"  :schema="schema">
+
+              <div class="flex flex-col  mt-y">
+
+                <div class="flex-1 min-h-80">
+                  <u-form-group label="Image URL" name="cover" class="mb-9" >
+                    <UInput v-model="coverForm.cover" :loading="isLoading" :disabled="isLoading"></UInput>
+                  </u-form-group>
+
+                  <u-form-group label="Description" name="description" class="mb-9"  >
+                    <UTextarea v-model="coverForm.description" :loading="isLoading" :disabled="isLoading"></UTextarea>
+                  </u-form-group>
+                </div>
+                <div class="flex-none flex">
+                  <UButton type="submit" class="mx-auto px-14 " :loading="isLoading" :disabled="isLoading" >
+                    <span class="text-white">Save</span>
+                  </UButton>
+                </div>
+
+              </div>
+            </UForm>
+
+          </UContainer>
         </div>
         <div class=" text-sm text-black main flex" v-show="mode === 'default'">
           <div class="m-auto">
