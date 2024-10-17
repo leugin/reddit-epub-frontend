@@ -1,7 +1,7 @@
 <script setup lang="ts">
 
 const modal = useModal()
-
+const yesBtn = ref()
 const props = defineProps({
   title:{
     type: String,
@@ -24,7 +24,6 @@ const noClose = ()=> {
   modal.close()
   emit('no')
 }
-
 </script>
 
 <template>
@@ -34,7 +33,7 @@ const noClose = ()=> {
         <div class="flex">
           <div class="flex-1">{{props.title ?? 'Question'}}</div>
           <div class="flex-none">
-            <u-button icon="i-heroicons-x-mark-20-solid" size="sm" @click="xClose()"></u-button>
+            <u-button icon="i-heroicons-x-mark-20-solid" size="sm" @click="xClose()" ></u-button>
           </div>
         </div>
       </template>
@@ -47,7 +46,7 @@ const noClose = ()=> {
 
           </div>
           <div >
-            <u-button @click="emit('yes')"> Yes </u-button>
+            <u-button @click="emit('yes')" autofocus ref="yesBtn"> Yes </u-button>
           </div>
         </div>
       </template>

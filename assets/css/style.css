@@ -4,3 +4,6 @@ body{
 .ql-container.ql-snow, .ql-toolbar.ql-snow{
     border: none !important;
 }
+.notifications.bottom-0 {
+    bottom: unset !important;
+}

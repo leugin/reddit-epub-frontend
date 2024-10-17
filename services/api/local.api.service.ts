@@ -8,7 +8,7 @@ export default class LocalApiService implements ApiService{
         const book:RedditBook = {
             name: "Book 1",
             author: "Author 1",
-            pages: []
+            content: []
         }
         return Promise.resolve({
             data: {
@@ -23,13 +23,23 @@ export default class LocalApiService implements ApiService{
         const book:RedditBook = {
             name: "Book 1",
             author: "Author 1",
-            pages: []
+            content: []
         }
         return Promise.resolve({data: book});
     }
 
     store(uuid: string, book: RedditBook): Promise<{ data: { url: string } }> {
         return Promise.resolve({data: {url: ""}});
+    }
+
+    put(uuid: string, book: RedditBook) {
+        return Promise.resolve({
+            data: {
+                url:'http://localhost:8080',
+                uuid:'XXXXXXXXX',
+                book
+            }
+        })
     }
 }
 

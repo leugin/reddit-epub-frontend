@@ -37,8 +37,6 @@ onMounted(async ()=> {
   quill.on('text-change', (delta, oldDelta, source) => {
     if (source === 'user'){
       isPristine.value = false
-      console.log('pristine', isPristine.value)
-
     }
 
   })

@@ -46,6 +46,12 @@ export default class AxiosApiService implements ApiService{
             data:  response.data
         })
     }
+    async put(uuid:string, book: RedditBook){
+        const response = await this.instance.put(`/api/v1/reddit/${uuid}`, book)
+         return Promise.resolve({
+            data:  response.data
+        })
+    }
 }
 
 

@@ -13,8 +13,10 @@ import {object, string} from "yup";
 const bookStore = BookStore()
 const route = useRoute();
 const modal = useModal()
+const alerts = useToast()
 const selectedItem = ref<any>(null)
 const queueLoading = ref(0)
+const panel = ref();
 const editor = ref<typeof RichEditor| null>(null)
 const mode = ref<'default'|'editor'|'cover'>('default')
 let content = ref<any[]>([]);
@@ -24,11 +26,64 @@ const coverForm = reactive({
   description: '',
   cover: '',
 })
+const mouseCoordinate = reactive({
+  x: 0,
+  y: 0,
+})
 const schema = object({
   description: string(),
   cover:string()
 })
 
+const mouseMovement = (e: MouseEvent) => {
+  mouseCoordinate.x = e.clientX
+  mouseCoordinate.y = e.clientY
+}
+
+const getSelectedIndex = () => {
+  return content.value.findIndex(val => val.id === selectedItem.value.id)
+}
+
+const getNextIndex = () => {
+  if (!selectedItem.value) {
+    return content.value.length > 0 ? 0: -1
+  }
+  const index = getSelectedIndex()
+  return index === -1 || index == content.value.length - 1 ? -1 : index + 1
+}
+const getLastIndex = () => {
+  if (!selectedItem.value) {
+    return content.value.length > 0 ? content.value.length - 1: -1
+  }
+  const index = getSelectedIndex()
+  return index === -1 || index === 0 ? -1 : index - 1
+}
+
+const isNavigable = ()=> {
+  const elementUnderCursor = document.elementFromPoint(mouseCoordinate.x, mouseCoordinate.y);
+  return !document?.activeElement?.classList.contains('ql-editor')
+      || elementUnderCursor?.parentElement?.classList.contains('draggable')
+
+}
+const navigationEvent = (e:KeyboardEvent) => {
+  if (isNavigable()) {
+    if(e.key == 'ArrowDown' || e.key == 'ArrowUp'){
+      const nextIndex = e.key == 'ArrowDown'
+          ?  getNextIndex()
+          : getLastIndex()
+      if (nextIndex != -1 ){
+        const item = content.value[nextIndex];
+        selectPage(item);
+        const ele = document.querySelector('#btn-page-'+ item.id)
+        ele?.scrollIntoView({
+              behavior: 'smooth', // Animación suave
+              block: 'nearest'    // Alinea el elemento lo más cercano a la vista posible
+            })
+      }
+    }
+  }
+
+}
 
 onMounted(async ()=> {
   if ( typeof route.params.uuid === 'string') {
@@ -42,7 +97,14 @@ onMounted(async ()=> {
     coverForm.cover = response.data.cover ?? ''
     coverForm.description = response.data.description ?? ''
   }
+  window.addEventListener('keydown', navigationEvent)
+  window.addEventListener('mousemove', mouseMovement)
 
+})
+
+onUnmounted(()=> {
+  window.removeEventListener('keydown', navigationEvent)
+  window.removeEventListener('mousemove', mouseMovement)
 })
 
 const user = computed(()=> {
@@ -77,12 +139,17 @@ const deletePage = (id: number) => {
     selectPage(nextPage);
     content.value.splice(index, 1)
   }
-
+}
+const selectPageById = (id: number) => {
+  const index = content.value.findIndex(val => val.id === id)
+  if (index != -1) {
+    const nextPage = content.value[index];
+    selectPage(nextPage);
+  }
 }
  const selectPage = ( page: {id:number, title:string,sub_title:string, content:string} )=> {
-  console.log(selectedItem.value, formIsPristine.value)
   if (selectedItem.value && !formIsPristine.value){
-    confirmModal(page).then((isYes) => {
+    confirmModal().then((isYes) => {
       if (isYes) {
         if (bookStore.book){
           const cp:RedditPage = {
@@ -93,14 +160,14 @@ const deletePage = (id: number) => {
          }
       }
       selectedItem.value = { ...page }
-      editor.value.setPristine(true)
+      editor?.value.setPristine(true)
       editor?.value?.setHtml(page.content)
       htmlContent.value = page.content
       mode.value = 'editor';
 
     })
   } else  {
-    editor.value.setPristine(true)
+    editor?.value.setPristine(true)
     editor?.value?.setHtml(page.content)
     selectedItem.value = {...page}
     mode.value = 'editor';
@@ -143,6 +210,40 @@ const store = async  () => {
     bookStore.book.description = coverForm.description
     const response =  await bookStore.store(route.params.uuid)
     queueLoading.value = queueLoading.value - 1
+    return response
+
+  }
+  return Promise.reject('book it is not valid')
+}
+
+const updateAll = async ()=> {
+  const cp:RedditPage = {
+    ...selectedItem.value,
+    content: editor?.value?.getHtml()
+  }
+  updatePage(cp, selectedItem.value.id )
+  await update()
+  editor?.value?.setPristine(true)
+
+}
+const update = async  () => {
+  if (typeof route.params.uuid ==='string' && bookStore.book ) {
+    queueLoading.value = queueLoading.value + 1
+    bookStore.book.content = content.value.map((item) => {
+      return {
+        title: item.title,
+        created: item.created,
+        content: item.content,
+      }
+    })
+    bookStore.book.cover = coverForm.cover
+    bookStore.book.description = coverForm.description
+    const response =  await bookStore.update(route.params.uuid)
+    queueLoading.value = queueLoading.value - 1
+    alerts.add({
+      title:'Guardado',
+      timeout:5
+    })
     return response
 
   }
@@ -199,6 +300,14 @@ const options = computed<SortableOptions>(() => {
   };
 });
 
+defineShortcuts({
+  meta_s:{
+    usingInput: true,
+    handler: async () => {
+      await updateAll()
+    }
+  }
+})
 
 </script>
 
@@ -215,9 +324,10 @@ const options = computed<SortableOptions>(() => {
                       class="m-auto text-center"
                       :disabled="isLoading"
                       :loading="isLoading"
+                      sj
                       :ui="{
                                rounded:'rounded-none'
-                             }" @click="saveBook">Save
+                             }" @click="updateAll">Save
             </u-button>
             <u-button variant="ghost"
                       class="m-auto text-center"
@@ -239,7 +349,7 @@ const options = computed<SortableOptions>(() => {
 
     <div class="flex h-full " id="body" style="height: calc(100vh - 100px)">
 
-      <div class=" flex w-48	flex-col panel" >
+      <div id="panel" ref="panel" class=" flex w-48	flex-col panel" >
         <div class="book-navigation flex flex-col flex-1" style="max-height: 100vh">
           <Sortable
               :list="content"
@@ -271,6 +381,7 @@ const options = computed<SortableOptions>(() => {
                 </UButton>
                 <UButton
                     :key="element.id" @click="selectPage(element)"
+                    :id="'btn-page-'+element.id"
                     :variant="element.id == selectedItem?.id ? 'solid':'ghost'"
                     class="flex-1 list-button w-full"
                     :ui="{
@@ -319,7 +430,7 @@ const options = computed<SortableOptions>(() => {
         </div>
         <div class=" text-sm bg-black main h-full" v-show="mode === 'cover'">
           <UContainer class="m-auto ">
-            <UForm :state="coverForm"  @submit="store"  :schema="schema">
+            <UForm :state="coverForm"  @submit="updateAll"  :schema="schema">
 
               <div class="flex flex-col  mt-y">
 

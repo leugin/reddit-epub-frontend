@@ -1,7 +1,7 @@
 export interface RedditPage {
     title:string,
     created:string,
-    html:string
+    content:string
 }
 
 export interface RedditBook {

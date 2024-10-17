@@ -1,5 +1,5 @@
 import {defineStore} from "pinia";
-import type {RedditBook, RedditPage} from "~/types/RedditBook";
+import type {RedditBook} from "~/types/RedditBook";
 
 const initialState= {
     book: undefined as RedditBook|undefined
@@ -19,7 +19,7 @@ export const BookStore = defineStore('bookStore',{
         },
         updatePage(page:{html:string}, index:number){
             if (this.book){
-                this.book.content[index].html = page.html
+                this.book.content[index].content = page.html
             }
         },
         deletePage(index:number){
@@ -28,6 +28,10 @@ export const BookStore = defineStore('bookStore',{
             }
         },
         store(uuid:string){
+            const { $api } = useNuxtApp()
+            return $api.store(uuid, this.book as RedditBook)
+        },
+        update(uuid:string){
             const { $api } = useNuxtApp()
             return $api.store(uuid, this.book as RedditBook)
         },
