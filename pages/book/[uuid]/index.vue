@@ -402,7 +402,6 @@ defineShortcuts({
         <div class=" text-sm text-black main" v-show="mode === 'editor'">
           <div class=" flex   py-4 ">
             <div class="flex flex-col flex-1">
-              <h1 class="m-auto font-bold">{{bookStore.book?.name  ? bookStore.book?.name:  '-'}}&nbsp;</h1>
               <h2 class="m-auto">{{bookStore.book?.author  ? bookStore.book?.author: '-'}}&nbsp;</h2>
               <h2 class="m-auto">{{selectedItem?.title ? selectedItem?.title : '-'}}</h2>
             </div>

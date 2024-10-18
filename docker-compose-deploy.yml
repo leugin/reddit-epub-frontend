@@ -1,0 +1,13 @@
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./:/app
+    command:  pnpm install
+    networks:
+      - reddit_network
+networks:
+  reddit_network:
+    driver: bridge
