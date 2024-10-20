@@ -26,6 +26,9 @@ const coverForm = reactive({
   description: '',
   cover: '',
 })
+const pageHeadForm = reactive({
+  title: ''
+})
 const mouseCoordinate = reactive({
   x: 0,
   y: 0,
@@ -33,6 +36,9 @@ const mouseCoordinate = reactive({
 const schema = object({
   description: string(),
   cover:string()
+})
+const pageHeadSchema = object({
+  title: string().required()
 })
 
 const mouseMovement = (e: MouseEvent) => {
@@ -128,6 +134,7 @@ const updatePage = (newPage: any, id:number) => {
   const  index = content.value.findIndex(value => value?.id === id);
   if(index != -1){
     content.value[index].content = newPage.content
+    content.value[index].title = newPage.title
   }
 }
 
@@ -140,14 +147,17 @@ const deletePage = (id: number) => {
     content.value.splice(index, 1)
   }
 }
-const selectPageById = (id: number) => {
-  const index = content.value.findIndex(val => val.id === id)
-  if (index != -1) {
-    const nextPage = content.value[index];
-    selectPage(nextPage);
-  }
+
+const setPageData = (page: {id:number, title:string, content:string})=> {
+  selectedItem.value = { ...page }
+  editor?.value?.setPristine(true)
+  editor?.value?.setHtml(page.content)
+  htmlContent.value = page.content
+  pageHeadForm.title = page.title
+  mode.value = 'editor'
+
 }
- const selectPage = ( page: {id:number, title:string,sub_title:string, content:string} )=> {
+ const selectPage = ( page: {id:number, title:string, content:string} )=> {
   if (selectedItem.value && !formIsPristine.value){
     confirmModal().then((isYes) => {
       if (isYes) {
@@ -159,18 +169,10 @@ const selectPageById = (id: number) => {
           updatePage(cp, selectedItem.value.id )
          }
       }
-      selectedItem.value = { ...page }
-      editor?.value.setPristine(true)
-      editor?.value?.setHtml(page.content)
-      htmlContent.value = page.content
-      mode.value = 'editor';
-
+      setPageData(page)
     })
   } else  {
-    editor?.value.setPristine(true)
-    editor?.value?.setHtml(page.content)
-    selectedItem.value = {...page}
-    mode.value = 'editor';
+    setPageData(page)
   }
 
 }
@@ -219,7 +221,8 @@ const store = async  () => {
 const updateAll = async ()=> {
   const cp:RedditPage = {
     ...selectedItem.value,
-    content: editor?.value?.getHtml()
+    content: editor?.value?.getHtml(),
+    title: pageHeadForm.title
   }
   updatePage(cp, selectedItem.value.id )
   await update()
@@ -400,29 +403,23 @@ defineShortcuts({
       </div>
       <div class=" flex flex-1 bg-white flex-col overflow-y-auto overflow-x-hidden " style="max-height: 100vh;">
         <div class=" text-sm text-black main" v-show="mode === 'editor'">
-          <div class=" flex   py-4 ">
-            <div class="flex flex-col flex-1">
-              <h2 class="m-auto">{{bookStore.book?.author  ? bookStore.book?.author: '-'}}&nbsp;</h2>
-              <h2 class="m-auto">{{selectedItem?.title ? selectedItem?.title : '-'}}</h2>
-            </div>
-            <div class="px-4 w-48">
-              <u-button variant="ghost"
-                        class="m-auto w-full text-center"
-                        :ui="{
-                               rounded:'rounded-none'
-                             }" @click="del">Eliminar
-              </u-button>
-              <u-button variant="ghost"
-                        class="m-auto w-full text-center"
-                        :disabled="formIsPristine"
-                        :ui="{
-                               rounded:'rounded-none'
-                             }" @click="savePage">Save
-              </u-button>
+          <UForm :state="pageHeadForm" @submit="updateAll" :schema="pageHeadSchema">
+            <div class=" flex   py-4 ">
+              <div class="flex flex-col flex-1 px-4">
+                <h2 class="">{{bookStore.book?.author  ? bookStore.book?.author: '-'}}&nbsp;</h2>
+                  <u-form-group  name="title" class="mb-9 bg-white" >
+                    <UInput
+                        v-model="pageHeadForm.title" :loading="isLoading" :disabled="isLoading"
+                        color="orange"
+                        input-class="text-color-black-important"
+
+                    ></UInput>
+                  </u-form-group>
+              </div>
 
             </div>
+          </UForm>
 
-          </div>
           <div class="overflow-y-auto" style="">
             <RichEditor ref="editor" v-model="htmlContent" :title="selectedItem?.title"></RichEditor>
           </div>
@@ -487,4 +484,5 @@ defineShortcuts({
   overflow: auto;
   max-width: 50vw;
 }
+
 </style>
