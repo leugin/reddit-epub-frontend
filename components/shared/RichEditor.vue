@@ -37,16 +37,10 @@ onMounted(async ()=> {
   quill.on('text-change', (delta, oldDelta, source) => {
     if (source === 'user'){
       isPristine.value = false
-     }
+    }
 
   })
 });
-const alert = (aler = 'asfaef')=> {
-  console.log(aler)
-}
-onUnmounted(()=> {
-})
-
 
 
 </script>

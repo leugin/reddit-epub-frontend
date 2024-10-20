@@ -4,7 +4,7 @@ export default defineAppConfig({
         primary: 'orange',
         notifications: {
             // Show toasts at the top right of the screen
-            position: 'notifications'
+            position: 'top-0 right-0 notifications'
         }
     }
 })

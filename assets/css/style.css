@@ -1,14 +1,9 @@
 body{
-    width: 100vw;
     height: 100vh;
-    overflow: hidden;
 }
 .ql-container.ql-snow, .ql-toolbar.ql-snow{
     border: none !important;
 }
-.notifications {
-    top: 0 !important;
-    right: 0 !important;
-    bottom: inherit !important;
-    left: inherit !important;
+.notifications.bottom-0 {
+    bottom: unset !important;
 }
