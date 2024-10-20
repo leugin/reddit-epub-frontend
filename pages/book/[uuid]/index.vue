@@ -24,6 +24,7 @@ const htmlContent = ref('')
 
 const coverForm = reactive({
   description: '',
+  title: '',
   cover: '',
 })
 const pageHeadForm = reactive({
@@ -100,6 +101,7 @@ onMounted(async ()=> {
        ...item
       };
     })
+    coverForm.title = response.data.title ?? ''
     coverForm.cover = response.data.cover ?? ''
     coverForm.description = response.data.description ?? ''
   }
@@ -210,6 +212,7 @@ const store = async  () => {
     })
     bookStore.book.cover = coverForm.cover
     bookStore.book.description = coverForm.description
+    bookStore.book.title = coverForm.title
     const response =  await bookStore.store(route.params.uuid)
     queueLoading.value = queueLoading.value - 1
     return response
@@ -224,7 +227,10 @@ const updateAll = async ()=> {
     content: editor?.value?.getHtml(),
     title: pageHeadForm.title
   }
-  updatePage(cp, selectedItem.value.id )
+  if (selectedItem.value){
+    updatePage(cp, selectedItem.value.id )
+
+  }
   await update()
   editor?.value?.setPristine(true)
 
@@ -241,6 +247,7 @@ const update = async  () => {
     })
     bookStore.book.cover = coverForm.cover
     bookStore.book.description = coverForm.description
+    bookStore.book.title = coverForm.title
     const response =  await bookStore.update(route.params.uuid)
     queueLoading.value = queueLoading.value - 1
     alerts.add({
@@ -431,6 +438,9 @@ defineShortcuts({
               <div class="flex flex-col  mt-y">
 
                 <div class="flex-1 min-h-80">
+                  <u-form-group label="Title" name="cover" class="mb-9" >
+                    <UInput v-model="coverForm.title" :loading="isLoading" :disabled="isLoading"></UInput>
+                  </u-form-group>
                   <u-form-group label="Image URL" name="cover" class="mb-9" >
                     <UInput v-model="coverForm.cover" :loading="isLoading" :disabled="isLoading"></UInput>
                   </u-form-group>
