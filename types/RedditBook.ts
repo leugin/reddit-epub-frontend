@@ -5,7 +5,7 @@ export interface RedditPage {
 }
 
 export interface RedditBook {
-    name: string,
+    title: string,
     author: string,
     cover?: string,
     description?: string,

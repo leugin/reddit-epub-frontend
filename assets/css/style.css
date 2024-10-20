@@ -7,3 +7,6 @@ body{
 .notifications.bottom-0 {
     bottom: unset !important;
 }
+.text-color-black-important{
+    color: #303030 !important;
+}
