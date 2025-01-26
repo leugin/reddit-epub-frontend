@@ -1,4 +1,5 @@
 import {defineStore} from "pinia";
+import {loginIn} from "~/services/api/v1/auth";
 
 const initialState:
     {
@@ -22,8 +23,7 @@ export const AuthStore = defineStore('authStore',{
     },
     actions:{
         async login(params : {email:string, password: string}) {
-            const { $api } = useNuxtApp()
-            const response = await $api.loginIn(params)
+            const response = await loginIn(params)
             if (response.data) {
                 this.user = response.data.user
                 this.token = response.data.access_token
