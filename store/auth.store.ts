@@ -45,6 +45,15 @@ export const AuthStore = defineStore('authStore',{
             this.token = null
             localStorage.removeItem('user')
             localStorage.removeItem('token')
+        },
+        checkIsLogin(){
+           const user = localStorage.getItem('user')
+            const token = localStorage.getItem('token')
+
+            if (user && token) {
+                this.user = JSON.parse(user)
+                this.token = token
+            }
         }
 
     }

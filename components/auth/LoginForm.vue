@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {object, string} from "yup";
-import {AuthStore} from "~/store/AuthStore";
+import {AuthStore} from "~/store/auth.store";
 
 const loading = ref(false)
 const authStore = AuthStore()

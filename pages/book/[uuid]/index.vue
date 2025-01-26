@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {BookStore} from "~/store/BookStore";
+import {BookStore} from "~/store/book.store";
 import {onMounted} from "vue";
 import SimpleModal from "~/components/shared/ConfirmModal.vue";
 import "quill/dist/quill.core.css";

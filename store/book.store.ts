@@ -1,6 +1,7 @@
 import {defineStore} from "pinia";
 import type {RedditBook} from "~/types/RedditBook";
-import {show, store} from "~/services/api/v1/reddit";
+import {findBySeeker, show, store} from "~/services/api/v1/reddit";
+import {find} from "~/services/api/v1/books";
 
 const initialState= {
     book: undefined as RedditBook|undefined
@@ -9,8 +10,10 @@ export const BookStore = defineStore('bookStore',{
     state: () => ({...initialState }),
     actions:{
        async findBySeeker(params : {alias:string, criteria:string}) {
-            const { $api } = useNuxtApp()
-           return await $api.findBySeeker(params)
+           return await findBySeeker(params)
+        },
+        async find(search:string | null = null){
+           return  await find(search);
         },
         async show(uuid: string) {
             const response   = await show(uuid)

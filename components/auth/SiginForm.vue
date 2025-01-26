@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {object, string} from "yup";
-import {AuthStore} from "~/store/AuthStore";
+import {AuthStore} from "~/store/auth.store";
 import {erroToMsj} from "~/services/api/tools";
 
 const loading = ref(false)
