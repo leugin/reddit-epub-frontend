@@ -38,7 +38,7 @@ defineExpose({
       <h3>Latest books</h3>
     </div>
     <div class="">
-      <div class="grid grid-cols-6 gap-6 " >
+      <div class="grid grid-cols-3  xl:grid-cols-5 2xl:grid-cols-6 gap-6 " >
         <UCard v-for="book in books" :key="book.uuid" >
           <template #header>
             <div class="flex flex-row">
