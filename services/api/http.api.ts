@@ -19,6 +19,18 @@ const httpFactory =  (base: string | null = null)=> {
             ...response.data
         };
     }, (error)=> {
+        if (error.response.status === 401) {
+            localStorage.removeItem('token')
+        }
+        if (error.response.status === 403) {
+            localStorage.removeItem('token')
+        }
+        if (error.response ) {
+            return Promise.reject({
+                data:error.response.data,
+                status: error.response.status
+            })
+        }
         return Promise.reject(error)
     })
 

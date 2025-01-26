@@ -4,6 +4,7 @@ import {object, string} from "yup";
 import type {DropdownItem} from "@nuxt/ui/dist/runtime/types";
 import LoginForm from "~/components/auth/LoginForm.vue";
 import {AuthStore} from "~/store/AuthStore";
+import SingingForm from "~/components/auth/SiginForm.vue";
 const bookStore = BookStore()
 const authStore = AuthStore()
 
@@ -44,7 +45,8 @@ const unAuthenticateItems:DropdownItem[][] = [
     click: () =>{openLogIn.value = true}
   },{
     label: 'Sign In',
-    icon:'heroicons:user-plus'
+    icon:'heroicons:user-plus',
+    click: () =>{openSingIn.value = true}
 
   }]
 ];
@@ -116,6 +118,11 @@ const openSingIn = ref(false)
     <UModal v-model="openLogIn" >
       <div class="p-4">
         <LoginForm @login-success="openLogIn = false"> </LoginForm>
+      </div>
+    </UModal>
+    <UModal v-model="openSingIn" >
+      <div class="p-4">
+        <SingingForm @login-success="openSingIn = false"> </SingingForm>
       </div>
     </UModal>
   </div>
