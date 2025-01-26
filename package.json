@@ -25,5 +25,8 @@
     "sortablejs-vue3": "^1.2.11",
     "vue": "latest",
     "yup": "^1.4.0"
+  },
+  "devDependencies": {
+    "@iconify-json/heroicons": "^1.2.2"
   }
 }
