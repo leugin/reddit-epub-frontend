@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import {BookStore} from "~/store/book.store";
 import {object, string} from "yup";
-import type {DropdownItem} from "@nuxt/ui/dist/runtime/types";
-import LoginForm from "~/components/auth/LoginForm.vue";
 import {AuthStore} from "~/store/auth.store";
-import SingingForm from "~/components/auth/SiginForm.vue";
+import HomeNav from "~/components/shared/navs/HomeNav.vue";
+
 const bookStore = BookStore()
 const authStore = AuthStore()
 
@@ -34,30 +33,7 @@ const sendForm = async  ()=> {
       })
     }
   }
-
-
 }
-
-const unAuthenticateItems:DropdownItem[][] = [
-  [{
-    label: 'Login In',
-    icon:'heroicons:arrow-right-end-on-rectangle-16-solid',
-    click: () =>{openLogIn.value = true}
-  },{
-    label: 'Sign In',
-    icon:'heroicons:user-plus',
-    click: () =>{openSingIn.value = true}
-
-  }]
-];
-
-const authItems:DropdownItem[][] = [
-  [{
-    label: 'Logout',
-    icon:'heroicons:arrow-right-end-on-rectangle-16-solid',
-    click: () =>{authStore.logOut()}
-  }]
-];
 
 const books = ref<any[]>([])
 const booksPagination = ref({
@@ -79,8 +55,6 @@ const formatDate = (date:Date) => {
   const d = new Date(date)
   return d.toLocaleDateString()
 }
-const items =  computed(()=> authStore.isAuth ? authItems : unAuthenticateItems)
-const loginText =  computed(()=> authStore.isAuth ? 'Log Out' : 'Log In')
 const openLogIn = ref(false)
 const openSingIn = ref(false)
 onMounted(()=> {
@@ -100,12 +74,8 @@ onMounted(()=> {
     <div class=" 	flex flex-col ">
       <u-container>
         <div class=""> <h1 class="text-5xl py-9"> Generate your reddit Epub Here</h1></div>
-        <div class="login ">
-          <UDropdown :items="items" :popper="{ placement: 'bottom-start' }">
-            <UButton color="white" :label="loginText" icon="i-heroicons-user-circle"  />
-          </UDropdown>
-        </div>
 
+        <home-nav @login-success="successLogin" @sing-in-success="successLogin"></home-nav>
       </u-container>
       <div class="pt-12 px-9">
         <div class=" mb-4 ">
@@ -185,25 +155,11 @@ onMounted(()=> {
         </div>
 
       </div>
-      <UModal v-model="openLogIn" >
-        <div class="p-4">
-          <LoginForm @login-success="openLogIn = false; successLogin()"> </LoginForm>
-        </div>
-      </UModal>
-      <UModal v-model="openSingIn" >
-        <div class="p-4">
-          <SingingForm @login-success="openSingIn = false; successLogin()"> </SingingForm>
-        </div>
-      </UModal>
+
   </div>
   </div>
 </template>
 
 <style scoped>
-.login{
-  position: fixed;
-  top: 40px;
-  right: 40px;
-  z-index: 3;
-}
+
 </style>
