@@ -11,6 +11,7 @@ import {object, string} from "yup";
 import BookNav from "~/components/book/[uuid]/BookNav.vue";
 import BookPanel from "~/components/book/[uuid]/BookPanel.vue";
 import BookCoverForm from "~/components/book/[uuid]/BookCoverForm.vue";
+import BookDefault from "~/components/book/[uuid]/BookDefault.vue";
 
 const bookStore = BookStore()
 const route = useRoute();
@@ -317,11 +318,7 @@ defineShortcuts({
           <book-cover-form :is-loading="isLoading" :data="coverForm"  v-if="mode === 'cover'" @save="saveCover" />
         </div>
         <div class=" text-sm text-black main flex" v-show="mode === 'default'">
-          <div class="m-auto">
-            <h1 class="font-bold"> Welcome here you can personalized your book  </h1>
-            <h3> In the right you can choose the character to edit or you can personalized the Cover</h3>
-            <h3> after you finished click on 'Menu' and download</h3>
-          </div>
+          <book-default/>
         </div>
 
       </div>
