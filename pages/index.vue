@@ -1,7 +1,12 @@
 <script setup lang="ts">
 import {BookStore} from "~/store/BookStore";
 import {object, string} from "yup";
+import type {DropdownItem} from "@nuxt/ui/dist/runtime/types";
+import LoginForm from "~/components/auth/LoginForm.vue";
+import {AuthStore} from "~/store/AuthStore";
+import SingingForm from "~/components/auth/SiginForm.vue";
 const bookStore = BookStore()
+const authStore = AuthStore()
 
 const loading = ref(false)
 
@@ -33,6 +38,35 @@ const sendForm = async  ()=> {
 
 }
 
+const unAuthenticateItems:DropdownItem[][] = [
+  [{
+    label: 'Login In',
+    icon:'heroicons:arrow-right-end-on-rectangle-16-solid',
+    click: () =>{openLogIn.value = true}
+  },{
+    label: 'Sign In',
+    icon:'heroicons:user-plus',
+    click: () =>{openSingIn.value = true}
+
+  }]
+];
+
+const authItems:DropdownItem[][] = [
+  [{
+    label: 'Logout',
+    icon:'heroicons:arrow-right-end-on-rectangle-16-solid',
+    click: () =>{authStore.logOut()}
+  }]
+];
+
+
+
+const items =  computed(()=> authStore.isAuth ? authItems : unAuthenticateItems)
+const loginText =  computed(()=> authStore.isAuth ? 'Log Out' : 'Log In')
+const openLogIn = ref(false)
+const openSingIn = ref(false)
+
+
 </script>
 
 <template>
@@ -40,6 +74,11 @@ const sendForm = async  ()=> {
   <div class=" min-h-screen	flex flex-col ">
     <u-container>
       <div class=""> <h1 class="text-5xl py-9"> Generate your reddit Epub Here</h1></div>
+      <div class="login ">
+        <UDropdown :items="items" :popper="{ placement: 'bottom-start' }">
+          <UButton color="white" :label="loginText" icon="i-heroicons-user-circle"  />
+        </UDropdown>
+      </div>
 
     </u-container>
     <div class="my-auto">
@@ -76,10 +115,24 @@ const sendForm = async  ()=> {
         </div>
       </div>
     </div>
-
+    <UModal v-model="openLogIn" >
+      <div class="p-4">
+        <LoginForm @login-success="openLogIn = false"> </LoginForm>
+      </div>
+    </UModal>
+    <UModal v-model="openSingIn" >
+      <div class="p-4">
+        <SingingForm @login-success="openSingIn = false"> </SingingForm>
+      </div>
+    </UModal>
   </div>
 </template>
 
 <style scoped>
-
+.login{
+  position: fixed;
+  top: 40px;
+  right: 40px;
+  z-index: 3;
+}
 </style>
