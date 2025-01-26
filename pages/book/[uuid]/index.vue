@@ -4,14 +4,13 @@ import {onMounted} from "vue";
 import SimpleModal from "~/components/shared/ConfirmModal.vue";
 import "quill/dist/quill.core.css";
 import "quill/dist/quill.snow.css";
-import RichEditor from "~/components/shared/RichEditor.vue";
 import type {RedditPage} from "~/types/RedditBook";
-import type { SortableOptions } from "sortablejs";
-import {object, string} from "yup";
 import BookNav from "~/components/book/[uuid]/BookNav.vue";
 import BookPanel from "~/components/book/[uuid]/BookPanel.vue";
 import BookCoverForm from "~/components/book/[uuid]/BookCoverForm.vue";
 import BookDefault from "~/components/book/[uuid]/BookDefault.vue";
+import BookPageForm from "~/components/book/[uuid]/BookPageForm.vue";
+import {erroToMsj} from "~/services/api/tools";
 
 const bookStore = BookStore()
 const route = useRoute();
@@ -20,7 +19,7 @@ const alerts = useToast()
 const selectedItem = ref<any>(null)
 const queueLoading = ref(0)
 const panel = ref();
-const editor = ref<typeof RichEditor| null>(null)
+const bookPageForm = ref<typeof BookPageForm| null>(null)
 const mode = ref<'default'|'editor'|'cover'>('default')
 let content = ref<any[]>([]);
 const htmlContent = ref('')
@@ -30,7 +29,8 @@ const coverForm = ref({
   title: '',
   cover: '',
 })
-const pageHeadForm = reactive({
+
+const pageHeadForm = ref({
   title: ''
 })
 const mouseCoordinate = reactive({
@@ -38,9 +38,6 @@ const mouseCoordinate = reactive({
   y: 0,
 })
 
-const pageHeadSchema = object({
-  title: string().required()
-})
 
 const mouseMovement = (e: MouseEvent) => {
   mouseCoordinate.x = e.clientX
@@ -118,7 +115,7 @@ onUnmounted(()=> {
 
 const isLoading = computed(()=> queueLoading.value !== 0);
 
-const formIsPristine = computed(()=> editor?.value?.isPristine)
+const formIsPristine = computed(()=> bookPageForm?.value?.isPristine())
 
 
 const updatePage = (newPage: any, id:number) => {
@@ -126,6 +123,7 @@ const updatePage = (newPage: any, id:number) => {
   if(index != -1){
     content.value[index].content = newPage.content
     content.value[index].title = newPage.title
+
   }
 }
 
@@ -141,10 +139,8 @@ const deletePage = (id: number) => {
 
 const setPageData = (page: {id:number, title:string, content:string})=> {
   selectedItem.value = { ...page }
-  editor?.value?.setPristine(true)
-  editor?.value?.setHtml(page.content)
   htmlContent.value = page.content
-  pageHeadForm.title = page.title
+  pageHeadForm.value.title = page.title
   mode.value = 'editor'
 
 }
@@ -155,7 +151,7 @@ const setPageData = (page: {id:number, title:string, content:string})=> {
         if (bookStore.book){
           const cp:RedditPage = {
             ...selectedItem.value,
-            content: editor?.value?.getHtml()
+            content: bookPageForm?.value?.html()
           }
           updatePage(cp, selectedItem.value.id )
          }
@@ -199,9 +195,9 @@ const store = async  () => {
         content: item.content,
       }
     })
-    bookStore.book.cover = coverForm.cover
-    bookStore.book.description = coverForm.description
-    bookStore.book.title = coverForm.title
+    bookStore.book.cover = coverForm.value.cover
+    bookStore.book.description = coverForm.value.description
+    bookStore.book.title = coverForm.value.title
     const response =  await bookStore.store(route.params.uuid)
     queueLoading.value = queueLoading.value - 1
     return response
@@ -211,17 +207,13 @@ const store = async  () => {
 }
 
 const updateAll = async ()=> {
-  const cp:RedditPage = {
-    ...selectedItem.value,
-    content: editor?.value?.getHtml(),
-    title: pageHeadForm.title
-  }
   if (selectedItem.value){
-    updatePage(cp, selectedItem.value.id )
+    const data = bookPageForm?.value?.formData()
+    savePage(data)
 
   }
   await update()
-  editor?.value?.setPristine(true)
+  bookPageForm?.value?.setPristine(true)
 
 }
 
@@ -245,13 +237,22 @@ const update = async  () => {
     bookStore.book.cover = coverForm.value.cover
     bookStore.book.description = coverForm.value.description
     bookStore.book.title = coverForm.value.title
-    const response =  await bookStore.update(route.params.uuid)
-    queueLoading.value = queueLoading.value - 1
-    alerts.add({
-      title:'Guardado',
-      timeout:5
-    })
-    return response
+    try {
+      const response =  await bookStore.update(route.params.uuid)
+      queueLoading.value = queueLoading.value - 1
+      alerts.add({
+        title:'Guardado',
+        timeout:5
+      })
+      return response
+    }catch (e: any) {
+      queueLoading.value = queueLoading.value - 1
+      alerts.add({
+        title: erroToMsj(e),
+        timeout:5
+      })
+    }
+
 
   }
   return Promise.reject('book it is not valid')
@@ -267,7 +268,16 @@ const saveBook = async (download = false) => {
     link.click()
   }
 }
-
+const savePage = (page: {title: string, content: string }) => {
+   if (selectedItem.value) {
+     const cp:RedditPage = {
+       ...selectedItem.value,
+       content: page.content,
+       title: page.title
+     }
+     updatePage(cp, selectedItem.value.id )
+   }
+}
 defineShortcuts({
   meta_s:{
     usingInput: true,
@@ -293,26 +303,11 @@ defineShortcuts({
       </div>
       <div class=" flex flex-1 bg-white flex-col overflow-y-auto overflow-x-hidden " style="max-height: 100vh;">
         <div class=" text-sm text-black main" v-show="mode === 'editor'">
-          <UForm :state="pageHeadForm" @submit="updateAll" :schema="pageHeadSchema">
-            <div class=" flex   py-4 ">
-              <div class="flex flex-col flex-1 px-4">
-                <h2 class="">{{bookStore.book?.author  ? bookStore.book?.author: '-'}}&nbsp;</h2>
-                  <u-form-group  name="title" class="mb-9 bg-white" >
-                    <UInput
-                        v-model="pageHeadForm.title" :loading="isLoading" :disabled="isLoading"
-                        color="orange"
-                        input-class="text-color-black-important"
-
-                    ></UInput>
-                  </u-form-group>
-              </div>
-
-            </div>
-          </UForm>
-
-          <div class="overflow-y-auto" style="">
-            <RichEditor ref="editor" v-model="htmlContent" :title="selectedItem?.title"></RichEditor>
-          </div>
+          <book-page-form
+              :selected-item="selectedItem" :is-loading="isLoading"
+              ref="bookPageForm"
+          @save="savePage"
+          />
         </div>
         <div class=" text-sm bg-black main h-full" v-show="mode === 'cover'">
           <book-cover-form :is-loading="isLoading" :data="coverForm"  v-if="mode === 'cover'" @save="saveCover" />
