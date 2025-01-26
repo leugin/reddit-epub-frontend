@@ -1,11 +1,14 @@
 <script setup lang="ts">
-import {AuthStore} from "~/store/auth.store";
+
 import type {DropdownItem} from "#ui/types";
+import {AuthStore} from "~/store/auth.store";
 import SingingForm from "~/components/auth/SiginForm.vue";
 import LoginForm from "~/components/auth/LoginForm.vue";
-import DropdownLogin from "~/components/shared/navs/DropdownLogin.vue";
 
+const emit = defineEmits(['loginSuccess','singInSuccess'])
 const useAuthStore = AuthStore()
+const openLogIn = ref(false)
+const openSingIn = ref(false)
 
 const unAuthenticateItems:DropdownItem[][] = [
   [{
@@ -30,26 +33,25 @@ const authItems:DropdownItem[][] = [
 const items =  computed(()=> useAuthStore.isAuth ? authItems : unAuthenticateItems)
 
 const loginText =  computed(()=> useAuthStore.isAuth ? 'Log Out' : 'Log In')
-const openLogIn = ref(false)
-const openSingIn = ref(false)
-const emit = defineEmits(['loginSuccess','singInSuccess'])
 
 </script>
 
 <template>
-  <div>
-    <div class="login ">
-      <dropdown-login @sing-in-success="emit('singInSuccess')" @login-success="emit('loginSuccess')"/>
+  <UDropdown :items="items" :popper="{ placement: 'bottom-start' }">
+    <UButton color="white" :label="loginText" icon="i-heroicons-user-circle"  />
+  </UDropdown>
+  <UModal v-model="openLogIn" >
+    <div class="p-4">
+      <LoginForm @login-success="openLogIn = false; emit('loginSuccess')"> </LoginForm>
     </div>
-  </div>
-
+  </UModal>
+  <UModal v-model="openSingIn" >
+    <div class="p-4">
+      <SingingForm @login-success="openSingIn = false; emit('singInSuccess')"> </SingingForm>
+    </div>
+  </UModal>
 </template>
 
 <style scoped>
-.login{
-  position: fixed;
-  top: 40px;
-  right: 40px;
-  z-index: 3;
-}
+
 </style>

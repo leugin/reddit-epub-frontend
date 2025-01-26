@@ -9,6 +9,7 @@ import type {RedditPage} from "~/types/RedditBook";
 import { Sortable } from "sortablejs-vue3";
 import type { SortableOptions } from "sortablejs";
 import {object, string} from "yup";
+import BookNav from "~/components/book/[uuid]/BookNav.vue";
 
 const bookStore = BookStore()
 const route = useRoute();
@@ -115,9 +116,7 @@ onUnmounted(()=> {
   window.removeEventListener('mousemove', mouseMovement)
 })
 
-const user = computed(()=> {
-  return null
-})
+
 const isLoading = computed(()=> queueLoading.value !== 0);
 
 const formIsPristine = computed(()=> editor?.value?.isPristine)
@@ -270,32 +269,6 @@ const saveBook = async (download = false) => {
     link.click()
   }
 }
-const savePage = () => {
-  const cp:any = {
-    ...selectedItem.value,
-    content: editor?.value?.getHtml()
-  }
-  updatePage(cp, selectedItem.value.id)
-  editor?.value.setPristine(true)
-
-}
-const del = () => {
- deletePage(selectedItem.value.id)
-
-
-}
-const open = ref(true)
-const items = [
-  [{
-    label: 'Logout',
-    click: ()=> {
-      console.log('click')
-    },
-    avatar: {
-      src: 'https://avatars.githubusercontent.com/u/739984?v=4'
-    }
-  }]
-]
 
 const options = computed<SortableOptions>(() => {
   return {
@@ -323,40 +296,7 @@ defineShortcuts({
 
 <template>
   <div>
-    <nav class="bg-black text-black head" >
-      <div class="w-full flex py-3.5 justify-between" >
-        <div class="my-auto ">
-          <h1 class="text-white">RedditPub</h1>
-        </div>
-        <div class="my-auto flex ">
-          <div class=" border-white flex" :class="{'border-r-2': !!user?.id}">
-            <u-button variant="ghost"
-                      class="m-auto text-center"
-                      :disabled="isLoading"
-                      :loading="isLoading"
-                      sj
-                      :ui="{
-                               rounded:'rounded-none'
-                             }" @click="updateAll">Save
-            </u-button>
-            <u-button variant="ghost"
-                      class="m-auto text-center"
-                      :disabled="isLoading"
-                      :loading="isLoading"
-                      :ui="{
-                               rounded:'rounded-none'
-                             }" @click="saveBook(true)">Download
-            </u-button>
-          </div>
-          <div>
-            <UDropdown v-model:open="open" :items="items" :popper="{ placement: 'bottom-start' }" v-if="!!user?.id">
-              <UButton color="white" label="" trailing-icon="i-heroicons-chevron-down-20-solid" />
-            </UDropdown>
-          </div>
-        </div>
-      </div>
-    </nav>
-
+    <book-nav :is-loading="isLoading" @save-book="saveBook" @update-all="update()" ></book-nav>
     <div class="flex h-full " id="body" style="height: calc(100vh - 100px)">
 
       <div id="panel" ref="panel" class=" flex w-48	flex-col panel" >
