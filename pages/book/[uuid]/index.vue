@@ -10,6 +10,7 @@ import type { SortableOptions } from "sortablejs";
 import {object, string} from "yup";
 import BookNav from "~/components/book/[uuid]/BookNav.vue";
 import BookPanel from "~/components/book/[uuid]/BookPanel.vue";
+import BookCoverForm from "~/components/book/[uuid]/BookCoverForm.vue";
 
 const bookStore = BookStore()
 const route = useRoute();
@@ -23,7 +24,7 @@ const mode = ref<'default'|'editor'|'cover'>('default')
 let content = ref<any[]>([]);
 const htmlContent = ref('')
 
-const coverForm = reactive({
+const coverForm = ref({
   description: '',
   title: '',
   cover: '',
@@ -35,10 +36,7 @@ const mouseCoordinate = reactive({
   x: 0,
   y: 0,
 })
-const schema = object({
-  description: string(),
-  cover:string()
-})
+
 const pageHeadSchema = object({
   title: string().required()
 })
@@ -102,9 +100,9 @@ onMounted(async ()=> {
        ...item
       };
     })
-    coverForm.title = response.data.title ?? ''
-    coverForm.cover = response.data.cover ?? ''
-    coverForm.description = response.data.description ?? ''
+    coverForm.value.title = response.data.title ?? ''
+    coverForm.value.cover = response.data.cover ?? ''
+    coverForm.value.description = response.data.description ?? ''
   }
   window.addEventListener('keydown', navigationEvent)
   window.addEventListener('mousemove', mouseMovement)
@@ -225,6 +223,14 @@ const updateAll = async ()=> {
   editor?.value?.setPristine(true)
 
 }
+
+const saveCover = async (form: {title:string, cover:string, description:string })=> {
+  queueLoading.value++
+  coverForm.value = form
+  await  updateAll()
+  queueLoading.value--
+
+}
 const update = async  () => {
   if (typeof route.params.uuid ==='string' && bookStore.book ) {
     queueLoading.value = queueLoading.value + 1
@@ -235,9 +241,9 @@ const update = async  () => {
         content: item.content,
       }
     })
-    bookStore.book.cover = coverForm.cover
-    bookStore.book.description = coverForm.description
-    bookStore.book.title = coverForm.title
+    bookStore.book.cover = coverForm.value.cover
+    bookStore.book.description = coverForm.value.description
+    bookStore.book.title = coverForm.value.title
     const response =  await bookStore.update(route.params.uuid)
     queueLoading.value = queueLoading.value - 1
     alerts.add({
@@ -308,33 +314,7 @@ defineShortcuts({
           </div>
         </div>
         <div class=" text-sm bg-black main h-full" v-show="mode === 'cover'">
-          <UContainer class="m-auto ">
-            <UForm :state="coverForm"  @submit="updateAll"  :schema="schema">
-
-              <div class="flex flex-col  mt-y">
-
-                <div class="flex-1 min-h-80">
-                  <u-form-group label="Title" name="cover" class="mb-9" >
-                    <UInput v-model="coverForm.title" :loading="isLoading" :disabled="isLoading"></UInput>
-                  </u-form-group>
-                  <u-form-group label="Image URL" name="cover" class="mb-9" >
-                    <UInput v-model="coverForm.cover" :loading="isLoading" :disabled="isLoading"></UInput>
-                  </u-form-group>
-
-                  <u-form-group label="Description" name="description" class="mb-9"  >
-                    <UTextarea v-model="coverForm.description" :loading="isLoading" :disabled="isLoading"></UTextarea>
-                  </u-form-group>
-                </div>
-                <div class="flex-none flex">
-                  <UButton type="submit" class="mx-auto px-14 " :loading="isLoading" :disabled="isLoading" >
-                    <span class="text-white">Save</span>
-                  </UButton>
-                </div>
-
-              </div>
-            </UForm>
-
-          </UContainer>
+          <book-cover-form :is-loading="isLoading" :data="coverForm"  v-if="mode === 'cover'" @save="saveCover" />
         </div>
         <div class=" text-sm text-black main flex" v-show="mode === 'default'">
           <div class="m-auto">
