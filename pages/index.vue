@@ -3,7 +3,9 @@ import {BookStore} from "~/store/BookStore";
 import {object, string} from "yup";
 import type {DropdownItem} from "@nuxt/ui/dist/runtime/types";
 import LoginForm from "~/components/auth/LoginForm.vue";
+import {AuthStore} from "~/store/AuthStore";
 const bookStore = BookStore()
+const authStore = AuthStore()
 
 const loading = ref(false)
 
@@ -35,7 +37,7 @@ const sendForm = async  ()=> {
 
 }
 
-const items:DropdownItem[][] = [
+const unAuthenticateItems:DropdownItem[][] = [
   [{
     label: 'Login In',
     icon:'heroicons:arrow-right-end-on-rectangle-16-solid',
@@ -45,8 +47,20 @@ const items:DropdownItem[][] = [
     icon:'heroicons:user-plus'
 
   }]
-]
+];
 
+const authItems:DropdownItem[][] = [
+  [{
+    label: 'Logout',
+    icon:'heroicons:arrow-right-end-on-rectangle-16-solid',
+    click: () =>{authStore.logOut()}
+  }]
+];
+
+
+
+const items =  computed(()=> authStore.isAuth ? authItems : unAuthenticateItems)
+const loginText =  computed(()=> authStore.isAuth ? 'Log Out' : 'Log In')
 const openLogIn = ref(false)
 const openSingIn = ref(false)
 
@@ -60,7 +74,7 @@ const openSingIn = ref(false)
       <div class=""> <h1 class="text-5xl py-9"> Generate your reddit Epub Here</h1></div>
       <div class="login ">
         <UDropdown :items="items" :popper="{ placement: 'bottom-start' }">
-          <UButton color="white" label="Login" icon="i-heroicons-user-circle"  />
+          <UButton color="white" :label="loginText" icon="i-heroicons-user-circle"  />
         </UDropdown>
       </div>
 
@@ -101,7 +115,7 @@ const openSingIn = ref(false)
     </div>
     <UModal v-model="openLogIn" >
       <div class="p-4">
-        <LoginForm> </LoginForm>
+        <LoginForm @login-success="openLogIn = false"> </LoginForm>
       </div>
     </UModal>
   </div>

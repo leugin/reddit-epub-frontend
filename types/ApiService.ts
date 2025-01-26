@@ -13,4 +13,5 @@ export default interface ApiService {
     show (uuid:string):Promise<{data: RedditBook}>;
     store (uuid:string, book: RedditBook):Promise<{data:{url:string}}>;
     put (uuid:string, book: RedditBook):Promise<BookResponse>;
+    loginIn (params : {email: string, password: string}):Promise<any>;
 }

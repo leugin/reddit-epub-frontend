@@ -1,12 +1,13 @@
 import type {RedditBook} from "~/types/RedditBook";
 import type ApiService from "~/types/ApiService";
+import {string} from "yup";
 
 
 export default class LocalApiService implements ApiService{
 
     async findBySeeker(params : {alias:string, criteria:string}) {
         const book:RedditBook = {
-            name: "Book 1",
+            title: "Book 1",
             author: "Author 1",
             content: []
         }
@@ -21,7 +22,7 @@ export default class LocalApiService implements ApiService{
 
     async show(uuid: string): Promise<{ data: RedditBook }> {
         const book:RedditBook = {
-            name: "Book 1",
+            title: "Book 1",
             author: "Author 1",
             content: []
         }
@@ -40,6 +41,10 @@ export default class LocalApiService implements ApiService{
                 book
             }
         })
+    }
+
+    loginIn(params: { email: string; password: string }): Promise<any> {
+        return Promise.resolve(undefined);
     }
 }
 

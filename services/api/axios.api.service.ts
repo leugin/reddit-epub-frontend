@@ -15,6 +15,7 @@ export default class AxiosApiService implements ApiService{
                 ...response.data
             };
         }, (error)=> {
+            console.log(error)
             return Promise.reject(error)
         })
     }
@@ -49,6 +50,13 @@ export default class AxiosApiService implements ApiService{
     async put(uuid:string, book: RedditBook){
         const response = await this.instance.put(`/api/v1/reddit/${uuid}`, book)
          return Promise.resolve({
+            data:  response.data
+        })
+    }
+
+    async loginIn(params : {email: string, password: string}) {
+        const response = await this.instance.post(`api/v1/auth/login`, params)
+        return Promise.resolve({
             data:  response.data
         })
     }

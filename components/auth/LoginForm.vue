@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import {object, string} from "yup";
-const loading = ref(false)
+import {AuthStore} from "~/store/AuthStore";
 
+const loading = ref(false)
+const authStore = AuthStore()
 const form = reactive({
-  email: undefined,
-  password: undefined,
+  email: '',
+  password: '',
 })
 
 const schema = object({
@@ -13,7 +15,18 @@ const schema = object({
 })
 const emit = defineEmits(['loginSuccess'])
 
-const sendForm = () => {}
+const sendForm = () => {
+  loading.value = true
+  authStore.login({
+    email: form.email,
+    password: form.password
+  }).then((res) => {
+    loading.value = false
+    emit('loginSuccess')
+  }).catch((err) => {
+    loading.value = false
+  })
+}
 </script>
 
 <template>
@@ -29,8 +42,8 @@ const sendForm = () => {}
         <u-form-group label="Email" name="email" class="mb-9"  >
           <UInput v-model="form.email" :loading="loading" :disabled="loading"></UInput>
         </u-form-group>
-        <u-form-group label="Find" name="search" class="mb-9" >
-          <UInput v-model="form.password" :loading="loading" :disabled="loading"></UInput>
+        <u-form-group label="Password" name="password" class="mb-9" >
+          <UInput v-model="form.password" :loading="loading" :disabled="loading" type="password"></UInput>
         </u-form-group>
       </div>
     </div>
