@@ -18,10 +18,8 @@ const store = async (uuid:string, book: RedditBook)=> {
 
 const findBySeeker = async (params: {alias: string, criteria: string}) => {
     const response  =  await get('/api/v1/reddit/find', {
-        params: {
-            sub_reddit: params.alias,
-            search: params.criteria
-        }
+        sub_reddit: params.alias,
+        search: params.criteria
     })
     return Promise.resolve({
         data: {
