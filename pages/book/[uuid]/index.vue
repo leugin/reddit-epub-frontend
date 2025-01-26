@@ -6,10 +6,10 @@ import "quill/dist/quill.core.css";
 import "quill/dist/quill.snow.css";
 import RichEditor from "~/components/shared/RichEditor.vue";
 import type {RedditPage} from "~/types/RedditBook";
-import { Sortable } from "sortablejs-vue3";
 import type { SortableOptions } from "sortablejs";
 import {object, string} from "yup";
 import BookNav from "~/components/book/[uuid]/BookNav.vue";
+import BookPanel from "~/components/book/[uuid]/BookPanel.vue";
 
 const bookStore = BookStore()
 const route = useRoute();
@@ -120,17 +120,8 @@ onUnmounted(()=> {
 const isLoading = computed(()=> queueLoading.value !== 0);
 
 const formIsPristine = computed(()=> editor?.value?.isPristine)
-const moveItemInArray = async (array: any[], from: number, to: number) => {
-  const item = array.splice(from, 1)[0];
-  array.splice(to, 0, item)
 
-};
 
-const onEnd = (event: any) => {
-  if (bookStore.book?.content){
-    moveItemInArray(content.value, event.oldIndex, event.newIndex)
-  }
-}
 const updatePage = (newPage: any, id:number) => {
   const  index = content.value.findIndex(value => value?.id === id);
   if(index != -1){
@@ -270,19 +261,6 @@ const saveBook = async (download = false) => {
   }
 }
 
-const options = computed<SortableOptions>(() => {
-  return {
-    draggable: ".draggable",
-    animation: 150,
-    ghostClass: "ghost",
-    dragClass: "drag",
-    group: "testgroup",
-    scroll: true,
-    forceFallback: true,
-    bubbleScroll: true,
-  };
-});
-
 defineShortcuts({
   meta_s:{
     usingInput: true,
@@ -300,53 +278,11 @@ defineShortcuts({
     <div class="flex h-full " id="body" style="height: calc(100vh - 100px)">
 
       <div id="panel" ref="panel" class=" flex w-48	flex-col panel" >
-        <div class="book-navigation flex flex-col flex-1" style="max-height: 100vh">
-          <Sortable
-              :list="content"
-              item-key="id"
-              tag="div"
-              @end="onEnd"
-              :options="options"
-          >
-            <-- The Header and Footer templates below are optional -->
-            <template #header>
-              <header>
-                <u-button :variant="mode == 'cover' ? 'solid':'ghost'"
-                          class="flex-1 m-auto w-full"
-                          :ui="{
-                     rounded:'rounded-none'
-                   }" @click="mode = 'cover'"> Cover </u-button>
-              </header>
-            </template>
-            <template #item="{element}">
-              <div class="draggable flex" :key="element.id">
-                <UButton
-                    :variant="'ghost'"
-                    :color="'red'"
-                    @click="deletePage(element.id)"
-                    :ui="{
-                                       rounded:'rounded-none'
-                                     }">
-                  X
-                </UButton>
-                <UButton
-                    :key="element.id" @click="selectPage(element)"
-                    :id="'btn-page-'+element.id"
-                    :variant="element.id == selectedItem?.id ? 'solid':'ghost'"
-                    class="flex-1 list-button w-full"
-                    :ui="{
-                                       rounded:'rounded-none'
-                                     }"
-
-                >
-                  {{element.title}}
-                </UButton>
-              </div>
-            </template>
-          </Sortable>
-
-        </div>
-
+        <book-panel :content="content" :selected-item="selectedItem"
+        @delete-page="deletePage"
+        @select-page="selectPage"
+        @selected-cover="mode = 'cover'"
+        />
       </div>
       <div class=" flex flex-1 bg-white flex-col overflow-y-auto overflow-x-hidden " style="max-height: 100vh;">
         <div class=" text-sm text-black main" v-show="mode === 'editor'">
@@ -416,15 +352,12 @@ defineShortcuts({
 
 <style scoped>
 
-.list-button{
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  overflow: hidden;
-}
+
 .main{
   height: calc(100vh - 92px);
   max-height: calc(100vh - 92px)
 }
+
 
 .panel{
   border: 2px solid transparent;
