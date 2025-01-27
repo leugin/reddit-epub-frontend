@@ -291,7 +291,7 @@ defineShortcuts({
 
 <template>
   <div>
-    <book-nav :is-loading="isLoading" @save-book="saveBook" @update-all="update()" ></book-nav>
+    <book-nav :is-loading="isLoading" @save-book="saveBook(true)" @update-all="update()" ></book-nav>
     <div class="flex h-full " id="body" style="height: calc(100vh - 100px)">
 
       <div id="panel" ref="panel" class=" flex w-48	flex-col panel" >
