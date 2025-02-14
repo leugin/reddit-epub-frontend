@@ -1,6 +1,6 @@
 import {defineStore} from "pinia";
 import type {RedditBook} from "~/types/RedditBook";
-import {findBySeeker, show, store} from "~/services/api/v1/reddit";
+import {findBySeeker, show, store, update} from "~/services/api/v1/reddit";
 import {find} from "~/services/api/v1/books";
 
 const initialState= {
@@ -34,7 +34,7 @@ export const BookStore = defineStore('bookStore',{
             return store(uuid, this.book as RedditBook)
         },
         update(uuid:string){
-            return store(uuid, this.book as RedditBook)
+            return update(uuid, this.book as RedditBook)
         },
     }
 })

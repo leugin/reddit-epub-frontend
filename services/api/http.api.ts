@@ -31,6 +31,13 @@ const httpFactory =  (base: string | null = null)=> {
                 status: error.response.status
             })
         }
+        if (error.code == 'ERR_NETWORK' ) {
+            return Promise.reject({
+                data:'',
+                status: '',
+                message:'Por favor intente de nuevo'
+            })
+        }
         return Promise.reject(error)
     })
 

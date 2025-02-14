@@ -145,22 +145,8 @@ const setPageData = (page: {id:number, title:string, content:string})=> {
 
 }
  const selectPage = ( page: {id:number, title:string, content:string} )=> {
-  if (selectedItem.value && !formIsPristine.value){
-    confirmModal().then((isYes) => {
-      if (isYes) {
-        if (bookStore.book){
-          const cp:RedditPage = {
-            ...selectedItem.value,
-            content: bookPageForm?.value?.html()
-          }
-          updatePage(cp, selectedItem.value.id )
-         }
-      }
-      setPageData(page)
-    })
-  } else  {
-    setPageData(page)
-  }
+   setPageData(page)
+
 
 }
 

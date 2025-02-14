@@ -1,5 +1,5 @@
 import type {RedditBook} from "~/types/RedditBook";
-import {get, post} from "~/services/api/http.api";
+import {get, post, put} from "~/services/api/http.api";
 
 const show = async (uuid: string)=> {
     const response = await get(`/api/v1/reddit/books/${uuid}`)
@@ -11,6 +11,12 @@ const show = async (uuid: string)=> {
 
 const store = async (uuid:string, book: RedditBook)=> {
     const response = await post(`/api/v1/reddit/books/${uuid}`, book)
+    return Promise.resolve({
+        data:  response.data
+    })
+}
+const update = async (uuid:string, book: RedditBook)=> {
+    const response = await put(`/api/v1/reddit/books/${uuid}`, book)
     return Promise.resolve({
         data:  response.data
     })
@@ -30,4 +36,4 @@ const findBySeeker = async (params: {alias: string, criteria: string}) => {
     })
 }
 
-export {show, store, findBySeeker}
+export {show, store, findBySeeker, update }
