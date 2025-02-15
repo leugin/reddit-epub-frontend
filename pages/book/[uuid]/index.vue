@@ -80,9 +80,9 @@ const navigationEvent = (e:KeyboardEvent) => {
         selectPage(item);
         const ele = document.querySelector('#btn-page-'+ item.id)
         ele?.scrollIntoView({
-              behavior: 'smooth', // Animación suave
-              block: 'nearest'    // Alinea el elemento lo más cercano a la vista posible
-            })
+          behavior: 'smooth', // Animación suave
+          block: 'nearest'    // Alinea el elemento lo más cercano a la vista posible
+        })
       }
     }
   }
@@ -95,7 +95,7 @@ onMounted(async ()=> {
     content.value = response.data.content.map((item, index ) => {
       return   {
         id:index,
-       ...item
+        ...item
       };
     })
     coverForm.value.title = response.data.title ?? ''
@@ -144,8 +144,8 @@ const setPageData = (page: {id:number, title:string, content:string})=> {
   mode.value = 'editor'
 
 }
- const selectPage = ( page: {id:number, title:string, content:string} )=> {
-   setPageData(page)
+const selectPage = ( page: {id:number, title:string, content:string} )=> {
+  setPageData(page)
 
 
 }
@@ -198,8 +198,18 @@ const updateAll = async ()=> {
     savePage(data)
 
   }
-  await update()
-  bookPageForm?.value?.setPristine(true)
+  try {
+    await update()
+    bookPageForm?.value?.setPristine(true)
+  }
+  catch (e: any) {
+  queueLoading.value = queueLoading.value - 1
+  alerts.add({
+    title: erroToMsj(e),
+    timeout:5
+  })
+}
+
 
 }
 
@@ -247,6 +257,7 @@ const update = async  () => {
 const saveBook = async (download = false) => {
   const response = await store()
   if (download){
+    console.log(response)
     const link = document.createElement('a')
     link.setAttribute('href', response.data.url)
     link.setAttribute('target', '_black')
@@ -255,15 +266,28 @@ const saveBook = async (download = false) => {
   }
 }
 const savePage = (page: {title: string, content: string }) => {
-   if (selectedItem.value) {
-     const cp:RedditPage = {
-       ...selectedItem.value,
-       content: page.content,
-       title: page.title
-     }
-     updatePage(cp, selectedItem.value.id )
-   }
+  if (selectedItem.value) {
+    const cp:RedditPage = {
+      ...selectedItem.value,
+      content: page.content,
+      title: page.title
+    }
+    updatePage(cp, selectedItem.value.id )
+  }
 }
+
+const addPage = (form: {title:string}) => {
+  const newPage: any = {
+    id: content.value.length,
+    title: form.title,
+    content: '',
+    created: new Date().toISOString()
+  }
+  content.value.push(newPage)
+  selectPage(newPage)
+  console.log(newPage)
+}
+
 defineShortcuts({
   meta_s:{
     usingInput: true,
@@ -273,6 +297,7 @@ defineShortcuts({
   }
 })
 
+
 </script>
 
 <template>
@@ -281,10 +306,11 @@ defineShortcuts({
     <div class="flex h-full " id="body" style="height: calc(100vh - 100px)">
 
       <div id="panel" ref="panel" class=" flex w-48	flex-col panel" >
-        <book-panel :content="content" :selected-item="selectedItem"
-        @delete-page="deletePage"
-        @select-page="selectPage"
-        @selected-cover="mode = 'cover'"
+        <book-panel v-bind:content="content" :selected-item="selectedItem"
+                    @delete-page="deletePage"
+                    @select-page="selectPage"
+                    @selected-cover="mode = 'cover'"
+                    @add-page="addPage"
         />
       </div>
       <div class=" flex flex-1 bg-white flex-col overflow-y-auto overflow-x-hidden " style="max-height: 100vh;">
@@ -292,7 +318,7 @@ defineShortcuts({
           <book-page-form
               :selected-item="selectedItem" :is-loading="isLoading"
               ref="bookPageForm"
-          @save="savePage"
+              @save="savePage"
           />
         </div>
         <div class=" text-sm bg-black main h-full" v-show="mode === 'cover'">

@@ -2,6 +2,7 @@
 import type { SortableOptions } from "sortablejs";
 
 import {Sortable} from "sortablejs-vue3";
+import {object, string} from "yup";
 
 const props = defineProps({
   content:{
@@ -20,7 +21,8 @@ const mode = ref('')
 const emit = defineEmits([
     'selectPage',
 'deletePage',
-    'selectedCover'
+    'selectedCover',
+    'addPage'
 ])
 
 const options = computed<SortableOptions>(() => {
@@ -36,8 +38,8 @@ const options = computed<SortableOptions>(() => {
   };
 });
 const moveItemInArray = async (array: any[], from: number, to: number) => {
-  const item = array.splice(from, 1)[0];
-  array.splice(to, 0, item)
+  const item = array.splice(from - 1, 1)[0];
+  array.splice(to -1, 0, item)
 
 };
 
@@ -46,7 +48,12 @@ const onEnd = (event: any) => {
     moveItemInArray(props.content, event.oldIndex, event.newIndex)
   }
 }
-
+const form = reactive({
+  title: '',
+})
+const schema = object({
+  title: string().required(),
+})
 
 </script>
 
@@ -92,6 +99,15 @@ const onEnd = (event: any) => {
             {{element.title}}
           </UButton>
         </div>
+      </template>
+      <template #footer>
+        <UForm :state="form"  @submit="emit('addPage', form)"  :schema="schema" class="flex w-full">
+          <UInput v-model="form.title" class="flex-1" ></UInput>
+
+          <UButton type="submit" class=" " >
+            <span class="text-white">+</span>
+          </UButton>
+        </UForm>
       </template>
     </Sortable>
 
